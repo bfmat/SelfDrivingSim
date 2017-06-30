@@ -6,18 +6,15 @@ public class Car : MonoBehaviour {
 	
 	const float forwardTorquePerFixedUpdate = 1f;
 
-	[SerializeField] GameObject castor;
-
-	Vector3 castorDelta;
-	Rigidbody driveAxleRigidbody;
+	WheelCollider[] driveWheels;
 
 	void Start () {
-		driveAxleRigidbody = GetComponent<Rigidbody> ();
-		castorDelta = castor.transform.position - transform.position;
+		driveWheels = GetComponentsInChildren<WheelCollider> ();
 	}
 
 	void FixedUpdate () {
-		driveAxleRigidbody.AddRelativeTorque (new Vector3 (0f, forwardTorquePerFixedUpdate, 0f));
-		castor.transform.position = transform.position + castorDelta;
+		foreach (var driveWheel in driveWheels) {
+			driveWheel.motorTorque = 150000f;
+		}
 	}
 }
