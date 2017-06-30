@@ -4,17 +4,13 @@ using UnityEngine;
 
 public class Car : MonoBehaviour {
 	
-	const float forwardTorquePerFixedUpdate = 1f;
+	const float forwardTorquePerFixedUpdate = 10f;
 
-	WheelCollider[] driveWheels;
-
-	void Start () {
-		driveWheels = GetComponentsInChildren<WheelCollider> ();
-	}
+	[SerializeField] WheelCollider[] driveWheels;
 
 	void FixedUpdate () {
 		foreach (var driveWheel in driveWheels) {
-			driveWheel.motorTorque = 150000f;
+			driveWheel.motorTorque = forwardTorquePerFixedUpdate;
 		}
 	}
 }
