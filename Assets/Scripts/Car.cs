@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class Car : MonoBehaviour {
 	
-	const float forwardTorquePerFixedUpdate = 10f;
+	const float averageTorque = 10f;
 
-	[SerializeField] WheelCollider[] driveWheels;
+	[SerializeField] [Range(-2, 2)] float steeringAngle;
+
+	[SerializeField] WheelCollider rightWheel, leftWheel;
 
 	void FixedUpdate () {
-		foreach (var driveWheel in driveWheels) {
-			driveWheel.motorTorque = forwardTorquePerFixedUpdate;
-		}
+		var leftSpeedMultiplier = Mathf.Exp ((float)steeringAngle);
+		var rightWheelTorque = averageTorque / (1 + leftSpeedMultiplier);
+		rightWheel.motorTorque = rightWheelTorque;
+		leftWheel.motorTorque = averageTorque - rightWheelTorque;
 	}
 }
