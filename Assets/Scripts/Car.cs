@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Car : MonoBehaviour {
-	
-	const float averageTorque = 10f;
 
-	[SerializeField] [Range(-2, 2)] float steeringAngle;
+	[SerializeField] [Range(-1f, 1f)] float steeringAngle;
+	[SerializeField] [Range(0f, 16f)] float torque;
 
-	[SerializeField] WheelCollider rightWheel, leftWheel;
+	[SerializeField] WheelCollider[] driveWheels;
 
 	void FixedUpdate () {
-		var leftSpeedMultiplier = Mathf.Exp ((float)steeringAngle);
-		var rightWheelTorque = averageTorque / (1 + leftSpeedMultiplier);
-		rightWheel.motorTorque = rightWheelTorque;
-		leftWheel.motorTorque = averageTorque - rightWheelTorque;
+		var steeringAngleDegrees = 90f * steeringAngle;
+		foreach (var driveWheel in driveWheels) {
+			driveWheel.steerAngle = steeringAngleDegrees;
+			driveWheel.motorTorque = torque;
+		}
 	}
 }
