@@ -162,6 +162,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1807107635909448
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4418470898166344}
+  - component: {fileID: 20770469908813438}
+  - component: {fileID: 124412271586126076}
+  - component: {fileID: 92307726619180186}
+  - component: {fileID: 81201993124031160}
+  m_Layer: 0
+  m_Name: Camera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1853028684305606
 GameObject:
   m_ObjectHideFlags: 0
@@ -204,6 +223,19 @@ Transform:
   - {fileID: 4930941876361100}
   m_Father: {fileID: 4762754577987542}
   m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4418470898166344
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807107635909448}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4762754577987542}
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4461437721251380
 Transform:
@@ -279,8 +311,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1367886802219984}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 29, z: 0}
+  m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: -70.29474, y: 3.0132098, z: 85.03265}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4723539158731522}
@@ -288,9 +320,10 @@ Transform:
   - {fileID: 4461437721251380}
   - {fileID: 4379965287435898}
   - {fileID: 4696613236111872}
+  - {fileID: 4418470898166344}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
 --- !u!4 &4768304649360258
 Transform:
   m_ObjectHideFlags: 1
@@ -317,6 +350,42 @@ Transform:
   m_Father: {fileID: 4379965287435898}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
+--- !u!20 &20770469908813438
+Camera:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807107635909448}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+  m_StereoMirrorMode: 0
 --- !u!23 &23003566889672714
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -539,6 +608,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!81 &81201993124031160
+AudioListener:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807107635909448}
+  m_Enabled: 1
+--- !u!92 &92307726619180186
+Behaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807107635909448}
+  m_Enabled: 1
 --- !u!114 &114828928279743310
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -555,6 +638,13 @@ MonoBehaviour:
   driveWheels:
   - {fileID: 146696422873735598}
   - {fileID: 146900401062833830}
+--- !u!124 &124412271586126076
+Behaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807107635909448}
+  m_Enabled: 1
 --- !u!146 &146110424025225656
 WheelCollider:
   m_ObjectHideFlags: 1
@@ -564,9 +654,9 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.5
   m_SuspensionSpring:
-    spring: 0.5
-    damper: 0
-    targetPosition: 0.05
+    spring: 1000
+    damper: 100
+    targetPosition: 0.5
   m_SuspensionDistance: 0.05
   m_ForceAppPointDistance: 0
   m_Mass: 3
@@ -593,9 +683,9 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.5
   m_SuspensionSpring:
-    spring: 0.5
-    damper: 0
-    targetPosition: 0.05
+    spring: 1000
+    damper: 100
+    targetPosition: 0.5
   m_SuspensionDistance: 0.05
   m_ForceAppPointDistance: 0
   m_Mass: 3
@@ -622,9 +712,9 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.5
   m_SuspensionSpring:
-    spring: 0.5
-    damper: 0
-    targetPosition: 0.05
+    spring: 1000
+    damper: 100
+    targetPosition: 0.5
   m_SuspensionDistance: 0.05
   m_ForceAppPointDistance: 0
   m_Mass: 3
@@ -651,9 +741,9 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.5
   m_SuspensionSpring:
-    spring: 0.5
-    damper: 0
-    targetPosition: 0.05
+    spring: 1000
+    damper: 100
+    targetPosition: 0.5
   m_SuspensionDistance: 0.05
   m_ForceAppPointDistance: 0
   m_Mass: 3

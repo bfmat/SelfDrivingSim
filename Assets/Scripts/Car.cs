@@ -9,11 +9,26 @@ public class Car : MonoBehaviour {
 
 	[SerializeField] WheelCollider[] driveWheels;
 
+	void Start () {
+		foreach (var wheel in GetComponentsInChildren<WheelCollider>()) {
+			wheel.ConfigureVehicleSubsteps (5f, 12, 15);
+		}
+	}
+
 	void FixedUpdate () {
 		var steeringAngleDegrees = 90f * steeringAngle;
 		foreach (var driveWheel in driveWheels) {
 			driveWheel.steerAngle = steeringAngleDegrees;
-			driveWheel.motorTorque = torque;
+			if (GetComponent<Rigidbody> ().velocity.magnitude < 3)
+				driveWheel.motorTorque = torque;
+			else
+				driveWheel.motorTorque = torque / 2;
 		}
+	}
+
+	void GenerateWaypoint () {
+		var waypoint = new GameObject ();
+		waypoint.name = "WP";
+		waypoint.transform.position = transform.position;
 	}
 }
