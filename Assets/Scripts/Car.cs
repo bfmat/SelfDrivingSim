@@ -5,9 +5,11 @@ using UnityEngine;
 public class Car : MonoBehaviour {
 
 	[SerializeField] [Range(-1f, 1f)] float steeringAngle;
-	[SerializeField] [Range(0f, 16f)] float torque;
 
 	[SerializeField] WheelCollider[] driveWheels;
+
+	const float steeringAngleMultiplier = 0.1f;
+	const float torque = 20f;
 
 	void Start () {
 		foreach (var wheel in GetComponentsInChildren<WheelCollider>()) {
@@ -16,13 +18,10 @@ public class Car : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		var steeringAngleDegrees = 90f * steeringAngle;
+		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
 		foreach (var driveWheel in driveWheels) {
 			driveWheel.steerAngle = steeringAngleDegrees;
-			if (GetComponent<Rigidbody> ().velocity.magnitude < 3)
-				driveWheel.motorTorque = torque;
-			else
-				driveWheel.motorTorque = torque / 2;
+			driveWheel.motorTorque = torque;
 		}
 	}
 
