@@ -1,23 +1,35 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+using System;
+using System.IO;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Car : MonoBehaviour {
-
-	[SerializeField] [Range(-1f, 1f)] float steeringAngle;
-
+	
 	[SerializeField] WheelCollider[] driveWheels;
 
 	const float steeringAngleMultiplier = 0.1f;
+	const float minSteeringBump = 0.005f;
 	const float torque = 20f;
+	const int resWidth = 720, resHeight = 480;
+
+	float steeringAngle = 0f;
+	List<string> labels = new List<string> ();
 
 	void Start () {
 		foreach (var wheel in GetComponentsInChildren<WheelCollider>()) {
 			wheel.ConfigureVehicleSubsteps (5f, 12, 15);
 		}
+		InvokeRepeating ("WriteLabels", 1f, 1f);
+		StartCoroutine (RecordFrame ());
 	}
 
 	void FixedUpdate () {
+		if (Input.GetKey (KeyCode.A))
+			steeringAngle -= minSteeringBump;
+		if (Input.GetKey (KeyCode.D))
+			steeringAngle += minSteeringBump;
+
 		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
 		foreach (var driveWheel in driveWheels) {
 			driveWheel.steerAngle = steeringAngleDegrees;
@@ -25,9 +37,28 @@ public class Car : MonoBehaviour {
 		}
 	}
 
-	void GenerateWaypoint () {
-		var waypoint = new GameObject ();
-		waypoint.name = "WP";
-		waypoint.transform.position = transform.position;
+	IEnumerator RecordFrame () {
+		var camera = GetComponentInChildren<Camera> ();
+		for (uint i = 0; true; i++) {
+			var renderTexture = new RenderTexture(resWidth, resHeight, 24);
+			camera.targetTexture = renderTexture;
+			var screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+			camera.Render();
+			RenderTexture.active = renderTexture;
+			screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+			camera.targetTexture = null;
+			RenderTexture.active = null; // JC: added to avoid errors
+			Destroy(renderTexture);
+			var bytes = screenShot.EncodeToPNG();
+			var filename = "/home/brendon/sim/" + i + ".png";
+			File.WriteAllBytes(filename, bytes);
+			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
+			yield return new WaitForEndOfFrame ();
+		}
+	}
+
+	void WriteLabels () {
+		var labelsArray = labels.ToArray ();
+		File.WriteAllLines ("/home/brendon/sim/labels.csv", labelsArray);
 	}
 }
