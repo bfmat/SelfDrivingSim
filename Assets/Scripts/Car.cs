@@ -6,12 +6,13 @@ using System.Collections.Generic;
 
 public class Car : MonoBehaviour {
 	
-	[SerializeField] WheelCollider[] driveWheels;
-
+	const DrivingMode drivingMode = DrivingMode.Autonomous;
 	const float steeringAngleMultiplier = 0.1f;
 	const float minSteeringBump = 0.005f;
 	const float torque = 20f;
-	const int resWidth = 720, resHeight = 480;
+	const int resWidth = 360, resHeight = 240;
+
+	[SerializeField] WheelCollider[] driveWheels;
 
 	float steeringAngle = 0f;
 	List<string> labels = new List<string> ();
@@ -20,15 +21,25 @@ public class Car : MonoBehaviour {
 		foreach (var wheel in GetComponentsInChildren<WheelCollider>()) {
 			wheel.ConfigureVehicleSubsteps (5f, 12, 15);
 		}
-		InvokeRepeating ("WriteLabels", 1f, 1f);
-		StartCoroutine (RecordFrame ());
+
+		if (drivingMode != DrivingMode.Manual) {
+			StartCoroutine (RecordFrame ());
+			if (drivingMode == DrivingMode.Recording)
+				InvokeRepeating ("WriteLabels", 1f, 1f);
+			else
+				StartCoroutine (HandleAutonomousSteering ());
+		}
 	}
 
 	void FixedUpdate () {
-		if (Input.GetKey (KeyCode.A))
-			steeringAngle -= minSteeringBump;
-		if (Input.GetKey (KeyCode.D))
-			steeringAngle += minSteeringBump;
+		if (drivingMode != DrivingMode.Autonomous) {
+			if (Input.GetKey (KeyCode.A))
+				steeringAngle -= minSteeringBump;
+			if (Input.GetKey (KeyCode.D))
+				steeringAngle += minSteeringBump;
+		} else {
+			
+		}
 
 		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
 		foreach (var driveWheel in driveWheels) {
@@ -50,15 +61,30 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = null; // JC: added to avoid errors
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
-			var filename = "/home/brendon/sim/" + i + ".png";
+			var filename = drivingMode == DrivingMode.Recording ? "/tmp/sim" + i + ".png" : "/tmp/sim.png";
 			File.WriteAllBytes(filename, bytes);
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
 		}
 	}
 
+	IEnumerator HandleAutonomousSteering () {
+		var streamReader = new StreamReader ("/tmp/sim");
+		while (true) {
+			var steeringAngle = streamReader.ReadToEnd ();
+			print (steeringAngle);
+			yield return null;
+		}
+	}
+
 	void WriteLabels () {
 		var labelsArray = labels.ToArray ();
 		File.WriteAllLines ("/home/brendon/sim/labels.csv", labelsArray);
+	}
+
+	enum DrivingMode {
+		Recording,
+		Autonomous,
+		Manual
 	}
 }
