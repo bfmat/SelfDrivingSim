@@ -37,8 +37,6 @@ public class Car : MonoBehaviour {
 				steeringAngle -= minSteeringBump;
 			if (Input.GetKey (KeyCode.D))
 				steeringAngle += minSteeringBump;
-		} else {
-			
 		}
 
 		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
@@ -46,6 +44,8 @@ public class Car : MonoBehaviour {
 			driveWheel.steerAngle = steeringAngleDegrees;
 			driveWheel.motorTorque = torque;
 		}
+
+		print (Time.timeSinceLevelLoad);
 	}
 
 	IEnumerator RecordFrame () {
@@ -73,7 +73,6 @@ public class Car : MonoBehaviour {
 			var streamReader = new StreamReader ("/tmp/sim");
 			var fileContents = streamReader.ReadToEnd ();
 			steeringAngle = float.Parse (fileContents);
-			print (steeringAngle);
 			yield return null;
 		}
 	}

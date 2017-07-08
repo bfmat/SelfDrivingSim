@@ -7171,15 +7171,15 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -175.7
+      value: -176.52
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 2.43
+      value: 2.172
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.z
-      value: -74.1
+      value: -73.98
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.x
@@ -7187,7 +7187,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 0.08715578
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.z
@@ -7195,122 +7195,18 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.9961947
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4533394595883996, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 1.3
+    - target: {fileID: 1843791811883798, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
+      propertyPath: m_Name
+      value: TestCamera
       objectReference: {fileID: 0}
-    - target: {fileID: 4533394595883996, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 146406995607575606, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.spring
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 146818543725268104, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.spring
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 146952074675201536, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.spring
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 146386210300407344, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.spring
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 146406995607575606, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.damper
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 146818543725268104, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.damper
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 146952074675201536, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.damper
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 146386210300407344, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.damper
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 146406995607575606, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_WheelDampingRate
-      value: 0.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 146818543725268104, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_WheelDampingRate
-      value: 0.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 146952074675201536, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_WheelDampingRate
-      value: 0.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 146386210300407344, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_WheelDampingRate
-      value: 0.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 146406995607575606, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionDistance
-      value: 0.025
-      objectReference: {fileID: 0}
-    - target: {fileID: 146818543725268104, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionDistance
-      value: 0.025
-      objectReference: {fileID: 0}
-    - target: {fileID: 146952074675201536, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionDistance
-      value: 0.025
-      objectReference: {fileID: 0}
-    - target: {fileID: 146386210300407344, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionDistance
-      value: 0.025
-      objectReference: {fileID: 0}
-    - target: {fileID: 146406995607575606, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.targetPosition
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 146818543725268104, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.targetPosition
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 146952074675201536, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.targetPosition
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 146386210300407344, guid: 69cd8e9933bb440a1a390a8611d415bf,
-        type: 2}
-      propertyPath: m_SuspensionSpring.targetPosition
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.y
+    - target: {fileID: 1897540292057676, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
