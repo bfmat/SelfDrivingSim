@@ -7171,15 +7171,15 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -32.8
+      value: -175.7
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 2.18
+      value: 2.43
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.z
-      value: -157.65
+      value: -74.1
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.x
@@ -7187,7 +7187,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.y
-      value: -0.7071068
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.z
@@ -7195,7 +7195,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.w
-      value: 0.7071068
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_RootOrder
@@ -7308,6 +7308,10 @@ Prefab:
         type: 2}
       propertyPath: m_SuspensionSpring.targetPosition
       value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}

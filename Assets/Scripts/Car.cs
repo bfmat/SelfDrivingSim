@@ -61,7 +61,7 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = null; // JC: added to avoid errors
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
-			var filename = drivingMode == DrivingMode.Recording ? "/tmp/sim" + i + ".png" : "/tmp/sim.png";
+			var filename = "/tmp/sim" + i + ".png";
 			File.WriteAllBytes(filename, bytes);
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
@@ -69,9 +69,10 @@ public class Car : MonoBehaviour {
 	}
 
 	IEnumerator HandleAutonomousSteering () {
-		var streamReader = new StreamReader ("/tmp/sim");
 		while (true) {
-			var steeringAngle = streamReader.ReadToEnd ();
+			var streamReader = new StreamReader ("/tmp/sim");
+			var fileContents = streamReader.ReadToEnd ();
+			steeringAngle = float.Parse (fileContents);
 			print (steeringAngle);
 			yield return null;
 		}
