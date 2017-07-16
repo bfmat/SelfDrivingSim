@@ -6,11 +6,12 @@ using System.Collections.Generic;
 
 public class Car : MonoBehaviour {
 	
-	const DrivingMode drivingMode = DrivingMode.Autonomous;
+	const DrivingMode drivingMode = DrivingMode.Manual;
 	const float steeringAngleMultiplier = 0.1f;
 	const float minSteeringBump = 0.005f;
 	const float torque = 20f;
 	const int resWidth = 360, resHeight = 240;
+	const bool enableWheel = true;
 
 	[SerializeField] WheelCollider[] driveWheels;
 
@@ -33,10 +34,14 @@ public class Car : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (drivingMode != DrivingMode.Autonomous) {
-			if (Input.GetKey (KeyCode.A))
-				steeringAngle -= minSteeringBump;
-			if (Input.GetKey (KeyCode.D))
-				steeringAngle += minSteeringBump;
+			if (enableWheel) {
+				steeringAngle = Input.GetAxis ("Steering");
+			} else {
+				if (Input.GetKey (KeyCode.A))
+					steeringAngle -= minSteeringBump;
+				if (Input.GetKey (KeyCode.D))
+					steeringAngle += minSteeringBump;
+			}
 		}
 
 		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
