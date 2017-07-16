@@ -6,10 +6,10 @@ using System.Collections.Generic;
 
 public class Car : MonoBehaviour {
 	
-	const DrivingMode drivingMode = DrivingMode.Manual;
+	const DrivingMode drivingMode = DrivingMode.Recording;
 	const float steeringAngleMultiplier = 0.1f;
 	const float minSteeringBump = 0.005f;
-	const float torque = 20f;
+	const float torque = 25f;
 	const int resWidth = 360, resHeight = 240;
 	const bool enableWheel = true;
 
@@ -66,7 +66,7 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = null; // JC: added to avoid errors
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
-			var filename = "/tmp/sim" + i + ".png";
+			var filename = "sim/" + i + ".png";
 			File.WriteAllBytes(filename, bytes);
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
@@ -84,7 +84,7 @@ public class Car : MonoBehaviour {
 
 	void WriteLabels () {
 		var labelsArray = labels.ToArray ();
-		File.WriteAllLines ("/home/brendon/sim/labels.csv", labelsArray);
+		File.WriteAllLines ("sim/labels.csv", labelsArray);
 	}
 
 	enum DrivingMode {
