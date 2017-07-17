@@ -3,14 +3,15 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 
 public class Car : MonoBehaviour {
 	
-	const DrivingMode drivingMode = DrivingMode.Recording;
+	const DrivingMode drivingMode = DrivingMode.Autonomous;
 	const float steeringAngleMultiplier = 0.1f;
 	const float minSteeringBump = 0.005f;
-	const float torque = 25f;
-	const int resWidth = 360, resHeight = 240;
+	const float torque = 20f;
+	const int resWidth = 200, resHeight = 150;
 	const bool enableWheel = true;
 
 	[SerializeField] WheelCollider[] driveWheels;
@@ -66,8 +67,9 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = null; // JC: added to avoid errors
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
-			var filename = "sim/" + i + ".png";
+			var filename = "/tmp/temp.png";
 			File.WriteAllBytes(filename, bytes);
+			File.Move ("/tmp/temp.png", "/tmp/sim" + i + ".png");
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
 		}
@@ -75,7 +77,15 @@ public class Car : MonoBehaviour {
 
 	IEnumerator HandleAutonomousSteering () {
 		while (true) {
-			var streamReader = new StreamReader ("/tmp/sim");
+			var maxIndex = -1;
+			foreach (var path in Directory.GetFiles("/tmp")) {
+				if (path.Contains ("sim.txt")) {
+					var index = int.Parse(path.Substring (5, path.Length - 12));
+					if (index > maxIndex)
+						maxIndex = index;
+				}
+			}
+			var streamReader = new StreamReader ("/tmp/" + maxIndex + "sim.txt");
 			var fileContents = streamReader.ReadToEnd ();
 			steeringAngle = float.Parse (fileContents);
 			yield return null;
