@@ -1,0 +1,122 @@
+fileFormatVersion: 2
+guid: de2d32b834f181b45b552bfe03071aee
+timeCreated: 18446744011573954816
+ModelImporter:
+  serializedVersion: 21
+  fileIDToRecycleName:
+    4300000: style1_2lanes_base_details_LOD1
+    4300002: style1_fade_2_to_3lanes_details_LOD1
+    4300004: style1_3anes_base_details_LOD1
+    4300006: style1_2lanes_middlepart_signs_details_LOD1
+    4300008: style1_3lanes_middlepart_signs_details_LOD1
+    4300010: style1_2lanes_exits_details_LOD1
+    4300012: style1_3lanes_exits_details_LOD1
+    4300014: style1_2lanes_parkingspace_details_LOD1
+    4300016: style1_3lanes_parkingspace_details_LOD1
+    4300018: style1_2lanes_curve_15degrees_details_LOD1
+    4300020: style1_3lanes_curve_15degrees_details_LOD1
+    4300022: style1_2lanes_curve_30degrees_details_LOD1
+    4300024: style1_3lanes_curve_30degrees_details_LOD1
+    4300026: fade_style1_style2_2lanes_details_LOD1
+    4300028: fade_style1_style2_3lanes_details_LOD1
+    4300030: style2_2lanes_base_details_LOD1
+    4300032: style2_fade_2_to_3lanes_details_LOD1
+    4300034: style2_3anes_base_details_LOD1
+    4300036: style2_2lanes_exits_details_LOD1
+    4300038: style2_3lanes_exits_details_LOD1
+    4300040: style2_2lanes_parkingspace_details_LOD1
+    4300042: style2_3lanes_parkingspace_details_LOD1
+    4300044: style2_2lanes_curve_15degrees_details_LOD1
+    4300046: style2_3lanes_curve_15degrees_details_LOD1
+    4300048: style2_2lanes_curve_30degrees_details_LOD1
+    4300050: style2_3lanes_curve_30degrees_details_LOD1
+    4300052: style3_2lanes_base_details_LOD1
+    4300054: style3_fade_2_to_3lanes_details_LOD1
+    4300056: style3_3anes_base_details_LOD1
+    4300058: style3_2lanes_exits_details_LOD1
+    4300060: style3_3lanes_exits_details_LOD1
+    4300062: style3_2lanes_parkingspace_details_LOD1
+    4300064: style3_3lanes_parkingspace_details_LOD1
+    4300066: style3_2lanes_curve_15degrees_details_LOD1
+    4300068: style3_3lanes_curve_15degrees_details_LOD1
+    4300070: style3_2lanes_curve_30degrees_details_LOD1
+    4300072: style3_3lanes_curve_30degrees_details_LOD1
+    4300074: fade_style1_style3_2lanes_details_LOD1
+    4300076: fade_style1_style3_3lanes_details_LOD1
+    4300078: fade_style2_style3_2lanes_details_LOD1
+    4300080: fade_style2_style3_3lanes_details_LOD1
+  materials:
+    importMaterials: 1
+    materialName: 2
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.01
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 34
+    normalImportMode: 1
+    tangentImportMode: 4
+    normalCalculationMode: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

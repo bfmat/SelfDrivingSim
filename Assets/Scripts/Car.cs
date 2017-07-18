@@ -7,14 +7,14 @@ using UnityEditor;
 
 public class Car : MonoBehaviour {
 	
-	const DrivingMode drivingMode = DrivingMode.Autonomous;
 	const float steeringAngleMultiplier = 0.1f;
 	const float minSteeringBump = 0.005f;
 	const float torque = 20f;
 	const int resWidth = 200, resHeight = 150;
-	const bool enableWheel = true;
 
+	[SerializeField] DrivingMode drivingMode;
 	[SerializeField] WheelCollider[] driveWheels;
+	[SerializeField] bool enableWheel;
 
 	float steeringAngle = 0f;
 	List<string> labels = new List<string> ();
