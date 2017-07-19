@@ -57,8 +57,12 @@ public class Car : MonoBehaviour {
 			currentlyRecording = true;
 		else if (recordingButton < 0)
 			currentlyRecording = false;
-
+		
+#if UNITY_EDITOR_WIN
 		print (currentlyRecording);
+#else
+		print (Time.timeSinceLevelLoad);
+#endif
 	}
 
 	IEnumerator RecordFrame () {
