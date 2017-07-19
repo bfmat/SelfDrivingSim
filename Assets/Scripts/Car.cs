@@ -18,6 +18,7 @@ public class Car : MonoBehaviour {
 
 	float steeringAngle = 0f;
 	List<string> labels = new List<string> ();
+	bool currentlyRecording = false;
 
 	void Start () {
 		foreach (var wheel in GetComponentsInChildren<WheelCollider>()) {
@@ -51,12 +52,21 @@ public class Car : MonoBehaviour {
 			driveWheel.motorTorque = torque;
 		}
 
-		print (Time.timeSinceLevelLoad);
+		var recordingButton = Input.GetAxisRaw ("EnableRecording");
+		if (recordingButton > 0)
+			currentlyRecording = true;
+		else if (recordingButton < 0)
+			currentlyRecording = false;
+
+		print (currentlyRecording);
 	}
 
 	IEnumerator RecordFrame () {
 		var camera = GetComponentInChildren<Camera> ();
 		for (uint i = 0; true; i++) {
+			do {
+				yield return new WaitForEndOfFrame ();
+			} while (!currentlyRecording);
 			var renderTexture = new RenderTexture(resWidth, resHeight, 24);
 			camera.targetTexture = renderTexture;
 			var screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
@@ -67,9 +77,15 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = null; // JC: added to avoid errors
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
-			var filename = "/tmp/sim" + i + ".png";
+#if UNITY_EDITOR_WIN
+			var filename = "sim/" + i + ".png";
+#else
+			var filename = "/tmp/temp.png";
+#endif
 			File.WriteAllBytes(filename, bytes);
-			//File.Move ("/tmp/temp.png", "/tmp/sim" + i + ".png");
+#if !UNITY_EDITOR_WIN
+			File.Move ("/tmp/temp.png", "/tmp/sim" + i + ".png");
+#endif
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
 		}
