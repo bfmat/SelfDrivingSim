@@ -67,9 +67,9 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = null; // JC: added to avoid errors
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
-			var filename = "/tmp/temp.png";
+			var filename = "/tmp/sim" + i + ".png";
 			File.WriteAllBytes(filename, bytes);
-			File.Move ("/tmp/temp.png", "/tmp/sim" + i + ".png");
+			//File.Move ("/tmp/temp.png", "/tmp/sim" + i + ".png");
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
 		}

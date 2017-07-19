@@ -4694,15 +4694,15 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -98
+      value: 610.6
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 2.172
+      value: 0.22
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalPosition.z
-      value: -192
+      value: -604.2
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.x
@@ -4710,15 +4710,15 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.y
-      value: 0.9063079
+      value: 0.53729963
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalRotation.w
-      value: -0.42261827
+      value: 0.8433915
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_RootOrder
@@ -4731,11 +4731,16 @@ Prefab:
     - target: {fileID: 114738169699072222, guid: 69cd8e9933bb440a1a390a8611d415bf,
         type: 2}
       propertyPath: drivingMode
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 230
+      value: 65
+      objectReference: {fileID: 0}
+    - target: {fileID: 114738169699072222, guid: 69cd8e9933bb440a1a390a8611d415bf,
+        type: 2}
+      propertyPath: enableWheel
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
