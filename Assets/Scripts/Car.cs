@@ -18,7 +18,7 @@ public class Car : MonoBehaviour {
 
 	float steeringAngle = 0f;
 	List<string> labels = new List<string> ();
-	bool currentlyRecording = false;
+	bool currentlyRecording;
 
 	void Start () {
 		foreach (var wheel in GetComponentsInChildren<WheelCollider>()) {
@@ -32,6 +32,8 @@ public class Car : MonoBehaviour {
 			else
 				StartCoroutine (HandleAutonomousSteering ());
 		}
+
+		currentlyRecording = !(drivingMode == DrivingMode.Recording);
 	}
 
 	void FixedUpdate () {
@@ -87,7 +89,7 @@ public class Car : MonoBehaviour {
 			var filename = "/tmp/temp.png";
 #endif
 			File.WriteAllBytes(filename, bytes);
-#if !UNITY_EDITOR_WIN
+#if UNITY_EDITOR_LINUX
 			File.Move ("/tmp/temp.png", "/tmp/sim" + i + ".png");
 #endif
 			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
