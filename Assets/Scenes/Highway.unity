@@ -49062,7 +49062,7 @@ Prefab:
     - target: {fileID: 114738169699072222, guid: 69cd8e9933bb440a1a390a8611d415bf,
         type: 2}
       propertyPath: drivingMode
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4243885707775776, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
       propertyPath: m_LocalEulerAnglesHint.y

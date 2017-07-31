@@ -11,7 +11,7 @@ public class Car : MonoBehaviour {
 	const float minSteeringBump = 0.005f;
 	const float torque = 16f;
 	const int resWidth = 200, resHeight = 150;
-	const string tmpPath = "/run/user/1000/gvfs/sftp:host=192.168.2.52,user=nvidia/home/nvidia/tmp/";
+	const string tmpPath = "/tmp/";
 	const string centerLineTag = "CenterLine";
 
 	[SerializeField] DrivingMode drivingMode;
@@ -96,7 +96,7 @@ public class Car : MonoBehaviour {
 		}
 		
 #if UNITY_EDITOR_WIN
-		//print (currentlyRecording);
+		print (currentlyRecording);
 #else
 		print (Time.timeSinceLevelLoad);
 #endif
