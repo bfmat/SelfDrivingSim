@@ -12,7 +12,6 @@ public class Car : MonoBehaviour {
 	const float torque = 16f;
 	const int resWidth = 200, resHeight = 150;
 	const string tmpPath = "/tmp/";
-	const string centerLineTag = "CenterLine";
 
 	[SerializeField] DrivingMode drivingMode;
 	[SerializeField] WheelCollider[] driveWheels;
@@ -23,7 +22,6 @@ public class Car : MonoBehaviour {
 	GameObject centerLine;
 	Vector2[] centerLinePoints;
 	float steeringAngle = 0f;
-	List<string> labels = new List<string> ();
 	List<float> errors = new List<float> ();
 	bool currentlyRecording;
 
@@ -40,21 +38,17 @@ public class Car : MonoBehaviour {
 
 		if (drivingMode != DrivingMode.Manual) {
 			StartCoroutine (RecordFrame ());
-			if (drivingMode == DrivingMode.Recording)
-				InvokeRepeating ("WriteLabels", 1f, 1f);
-			else
+			if (drivingMode != DrivingMode.Recording)
 				StartCoroutine (HandleAutonomousSteering ());
 		}
 
 		if (drawLine) {
 			centerLine = new GameObject ("Center Line");
-			centerLine.tag = centerLineTag;
 			centerLine.transform.position = Vector3.zero;
 			InvokeRepeating ("DrawCenterLinePoint", 0.5f, 0.5f);
 		}
 	
 		if (trackErrors) {
-			centerLine = GameObject.FindGameObjectWithTag (centerLineTag);
 			var centerLinePointObjects = centerLine.GetComponentsInChildren<Transform> ();
 			centerLinePoints = new Vector2[centerLinePointObjects.Length];
 			for (var i = 0; i < centerLinePoints.Length; i++) {
@@ -63,7 +57,7 @@ public class Car : MonoBehaviour {
 			}
 		}
 
-		currentlyRecording = !(drivingMode == DrivingMode.Recording);
+		currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
 	}
 
 	void FixedUpdate () {
@@ -104,10 +98,11 @@ public class Car : MonoBehaviour {
 
 	IEnumerator RecordFrame () {
 		var camera = GetComponentInChildren<Camera> ();
-		for (uint i = 0; true; i++) {
+		while (true) {
 			do {
 				yield return new WaitForEndOfFrame ();
 			} while (!currentlyRecording);
+
 			var renderTexture = new RenderTexture(resWidth, resHeight, 24);
 			camera.targetTexture = renderTexture;
 			var screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
@@ -115,11 +110,13 @@ public class Car : MonoBehaviour {
 			RenderTexture.active = renderTexture;
 			screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
 			camera.targetTexture = null;
-			RenderTexture.active = null; // JC: added to avoid errors
+			RenderTexture.active = null;
 			Destroy(renderTexture);
 			var bytes = screenShot.EncodeToPNG();
 #if UNITY_EDITOR_WIN
-			var filename = "sim/" + i + ".png";
+			var unixTimestamp = (uint)(DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1))).TotalMilliseconds;
+			var steeringAngleText = steeringAngle.ToString ("F7");
+			var filename = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
 #else
 			var filename = tmpPath + "temp.png";
 #endif
@@ -127,7 +124,6 @@ public class Car : MonoBehaviour {
 #if UNITY_EDITOR_LINUX
 			File.Move (tmpPath + "temp.png", tmpPath + "sim" + i + ".png");
 #endif
-			labels.Add (filename + "," + steeringAngle.ToString ("F7"));
 			yield return new WaitForEndOfFrame ();
 		}
 	}
@@ -200,11 +196,6 @@ public class Car : MonoBehaviour {
 	Vector2 ProjectOntoXZPlane (Vector3 _3DPoint) {
 		var _2DPoint = new Vector2(_3DPoint.x, _3DPoint.z);
 		return _2DPoint;
-	}
-
-	void WriteLabels () {
-		var labelsArray = labels.ToArray ();
-		File.WriteAllLines ("sim/labels.csv", labelsArray);
 	}
 
 	enum DrivingMode {
