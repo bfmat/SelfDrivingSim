@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -10,6 +11,7 @@ public class Car : MonoBehaviour {
 	const float steeringAngleMultiplier = 0.1f;
 	const float minSteeringBump = 0.005f;
 	const float torque = 16f;
+	const float timeSpentOnLane = 400f;
 	const int resWidth = 200, resHeight = 150;
 	const string tmpPath = "/tmp/";
 
@@ -17,17 +19,21 @@ public class Car : MonoBehaviour {
 	[SerializeField] WheelCollider[] driveWheels;
 	[SerializeField] bool enableWheel;
 	[SerializeField] bool drawLine;
+	[SerializeField] GameObject[] centerLinePointCollections;
 
 	bool trackErrors = false;
 	GameObject centerLine;
 	Vector2[] centerLinePoints;
+	byte currentLane = 0;
 	float steeringAngle = 0f;
-	List<float> errors = new List<float> ();
+	List<float> errors;
 	bool currentlyRecording;
+	Rigidbody rb;
 
 	void Start () {
 		if (drivingMode == DrivingMode.AutonomousVarianceTest) {
-			Invoke ("PrintTestResults", 10f);
+			rb = GetComponent<Rigidbody> ();
+			SwitchLanes ();
 			trackErrors = true;
 			drivingMode = DrivingMode.Autonomous;
 		}
@@ -46,15 +52,6 @@ public class Car : MonoBehaviour {
 			centerLine = new GameObject ("Center Line");
 			centerLine.transform.position = Vector3.zero;
 			InvokeRepeating ("DrawCenterLinePoint", 0.5f, 0.5f);
-		}
-	
-		if (trackErrors) {
-			var centerLinePointObjects = centerLine.GetComponentsInChildren<Transform> ();
-			centerLinePoints = new Vector2[centerLinePointObjects.Length];
-			for (var i = 0; i < centerLinePoints.Length; i++) {
-				var position = centerLinePointObjects [i].position;
-				centerLinePoints [i] = ProjectOntoXZPlane (position);
-			}
 		}
 
 		currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
@@ -98,7 +95,11 @@ public class Car : MonoBehaviour {
 
 	IEnumerator RecordFrame () {
 		var camera = GetComponentInChildren<Camera> ();
+#if UNITY_EDITOR_LINUX
+		for (var i = 0; true; i++) {
+#else
 		while (true) {
+#endif
 			do {
 				yield return new WaitForEndOfFrame ();
 			} while (!currentlyRecording);
@@ -153,6 +154,8 @@ public class Car : MonoBehaviour {
 		var secondDelta = (carPosition - secondPoint).sqrMagnitude;
 
 		foreach (var point in centerLinePoints) {
+			if (point == firstPoint || point == secondPoint)
+				continue;
 			var pointDelta = (carPosition - point).sqrMagnitude;
 			if (pointDelta < firstDelta) {
 				secondPoint = firstPoint;
@@ -177,14 +180,45 @@ public class Car : MonoBehaviour {
 		return variance;
 	}
 
-	void PrintTestResults () {
+	void SwitchLanes () {
+		var numLanes = centerLinePointCollections.Length;
+
+		if (currentLane > 0)
+			SaveTestResults ();
+		if (currentLane > numLanes)
+			return;
+		if (currentLane <= numLanes)
+			Invoke ("SwitchLanes", timeSpentOnLane);
+
+		centerLine = centerLinePointCollections [currentLane];
+		var centerLineTransforms = centerLine.GetComponentsInChildren<Transform> ();
+		var centerLinePointObjects = centerLineTransforms.Skip (1).Distinct ().ToArray ();
+		var startingPointTransform = centerLinePointObjects [0];
+		transform.position = startingPointTransform.position;
+		transform.rotation = startingPointTransform.rotation;
+		rb.velocity = Vector3.zero;
+		centerLinePoints = new Vector2[centerLinePointObjects.Length];
+
+		for (var i = 0; i < centerLinePoints.Length; i++) {
+			var position = centerLinePointObjects [i].position;
+			centerLinePoints [i] = ProjectOntoXZPlane (position);
+		}
+			
+		errors = new List<float> ();
+		currentLane++;
+	}
+
+	void SaveTestResults () {
 		var totalVariance = 0f;
 		foreach (var error in errors) {
 			totalVariance += error;
 		}
+
 		var meanVariance = totalVariance / errors.Count;
 		var standardDeviation = Mathf.Sqrt (meanVariance);
 		print ("Standard deviation from center line was " + standardDeviation);
+		var stringErrors = Array.ConvertAll (errors.ToArray (), x => x.ToString ("F7"));
+		File.WriteAllLines ("sim/results" + currentLane + ".txt", stringErrors);
 	}
 
 	void DrawCenterLinePoint () {
