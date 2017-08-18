@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System;
 using System.IO;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 
 public class Car : MonoBehaviour {
 	
@@ -12,6 +12,7 @@ public class Car : MonoBehaviour {
 	const float minSteeringBump = 0.005f;
 	const float torque = 16f;
 	const float timeSpentOnLane = 400f;
+	const float wheelBase = 0.914f;
 	const int resWidth = 200, resHeight = 150;
 	const string tmpPath = "/tmp/";
 
@@ -29,6 +30,9 @@ public class Car : MonoBehaviour {
 	List<float> errors;
 	bool currentlyRecording;
 	Rigidbody rb;
+
+	Vector3 initialPosition;
+	Vector3 lastPosition;
 
 	void Start () {
 		if (drivingMode == DrivingMode.AutonomousVarianceTest) {
@@ -55,8 +59,10 @@ public class Car : MonoBehaviour {
 		}
 
 		currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
-	}
 
+		initialPosition = transform.position;
+	}
+		
 	void FixedUpdate () {
 		if (drivingMode != DrivingMode.Autonomous) {
 			if (enableWheel) {
@@ -69,9 +75,8 @@ public class Car : MonoBehaviour {
 			}
 		}
 
-		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
 		foreach (var driveWheel in driveWheels) {
-			driveWheel.steerAngle = steeringAngleDegrees;
+			driveWheel.steerAngle = GetCurrentSteeringAngleDegrees(steeringAngle);
 			driveWheel.motorTorque = torque;
 		}
 
@@ -85,11 +90,16 @@ public class Car : MonoBehaviour {
 			var error = CalculateCenterLineError ();
 			errors.Add (error);
 		}
+
+		var currentDist = (transform.position - initialPosition).magnitude;
+		var lastDist = (lastPosition - initialPosition).magnitude;
+		if (currentDist < lastDist) print(lastDist);
+		lastPosition = transform.position;
 		
 #if UNITY_EDITOR_WIN
 		print (currentlyRecording);
 #else
-		print (Time.timeSinceLevelLoad);
+		//print (Time.timeSinceLevelLoad);
 #endif
 	}
 
@@ -116,7 +126,7 @@ public class Car : MonoBehaviour {
 			var bytes = screenShot.EncodeToPNG();
 #if UNITY_EDITOR_WIN
 			var unixTimestamp = (uint)(DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1))).TotalMilliseconds;
-			var steeringAngleText = steeringAngle.ToString ("F7");
+			var steeringAngleText = GetSteeringAngleDegrees(steeringAngle).ToString ("F7");
 			var filename = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
 #else
 			var filename = tmpPath + "temp.png";
@@ -141,7 +151,8 @@ public class Car : MonoBehaviour {
 			}
 			var streamReader = new StreamReader (tmpPath + maxIndex + "sim.txt");
 			var fileContents = streamReader.ReadToEnd ();
-			steeringAngle = float.Parse (fileContents);
+			var inverseTurningRadius = float.Parse (fileContents);
+			steeringAngle = InverseTurningRadiusToSteeringAngleDegrees (inverseTurningRadius);
 			yield return null;
 		}
 	}
@@ -221,6 +232,18 @@ public class Car : MonoBehaviour {
 		File.WriteAllLines ("sim/results" + currentLane + ".txt", stringErrors);
 	}
 
+	float InverseTurningRadiusToSteeringAngleDegrees (float inverseTurningRadius) {
+		var wheelAngleRadians = Mathf.Atan (inverseTurningRadius * wheelBase);
+		var wheelAngleDegrees = wheelAngleRadians * Mathf.Rad2Deg;
+		return wheelAngleDegrees;
+	}
+
+	float SteeringAngleDegreesToInverseTurningRadius (float wheelAngleDegrees) {
+		var wheelAngleRadians = wheelAngleDegrees * Mathf.Deg2Rad;
+		var inverseTurningRadius = Mathf.Tan (wheelAngleRadians) / wheelBase;
+		return inverseTurningRadius;
+	}
+
 	void DrawCenterLinePoint () {
 		var point = new GameObject ("Point");
 		point.transform.position = transform.position;
@@ -230,6 +253,11 @@ public class Car : MonoBehaviour {
 	Vector2 ProjectOntoXZPlane (Vector3 _3DPoint) {
 		var _2DPoint = new Vector2(_3DPoint.x, _3DPoint.z);
 		return _2DPoint;
+	}
+
+	float GetCurrentSteeringAngleDegrees (float steeringAngle) {
+		var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
+		return steeringAngleDegrees;
 	}
 
 	enum DrivingMode {

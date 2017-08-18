@@ -290,7 +290,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1261381486438800}
   m_LocalRotation: {x: 0, y: 0.08715578, z: 0, w: 0.9961947}
-  m_LocalPosition: {x: -176.52, y: 2.172, z: -73.98}
+  m_LocalPosition: {x: -176.52, y: 28.176, z: -73.98}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4894208678456082}
@@ -716,9 +716,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce400fa9fd0bf4998aa192611cb96324, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drivingMode: 3
   driveWheels:
   - {fileID: 146952074675201536}
   - {fileID: 146818543725268104}
+  enableWheel: 0
+  drawLine: 0
+  centerLinePointCollections: []
 --- !u!124 &124407164091438050
 Behaviour:
   m_ObjectHideFlags: 1
