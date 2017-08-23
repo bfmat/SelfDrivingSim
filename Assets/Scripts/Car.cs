@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,28 +7,28 @@ using System.Collections.Generic;
 
 public class Car : MonoBehaviour {
 	
-	const float steeringAngleMultiplier = 0.1f;
-	const float minSteeringBump = 0.005f;
-	const float torque = 16f;
-	const float timeSpentOnLane = 400f;
-	const float wheelBase = 0.914f;
-	const int resWidth = 200, resHeight = 150;
-	const string tmpPath = "/tmp/";
+	const float steeringAngleMultiplier = 0.1f; // Scaling factor for the steering wheel input 
+	const float minSteeringBump = 0.005f; // The amount to increase the steering angle per key press (for keyboard controls)
+	const float torque = 16f; // Torque to constantly apply to the front wheels
+	const float timeSpentOnLane = 400f; // During automated tests, spend this many seconds on each individual lane
+	const float wheelBase = 0.914f; // The distance from the center of the front wheels to the center of the back wheels
+	const int resWidth = 200, resHeight = 150; // Width and height of saved screenshots
+	const string tmpPath = "/tmp/"; // Path to save images in during autonomous driving
 
-	[SerializeField] DrivingMode drivingMode;
-	[SerializeField] WheelCollider[] driveWheels;
-	[SerializeField] bool enableWheel;
-	[SerializeField] bool drawLine;
-	[SerializeField] GameObject[] centerLinePointCollections;
+	[SerializeField] DrivingMode drivingMode; // Manual, recording, autonomous, automated test
+	[SerializeField] WheelCollider[] driveWheels; // The two front wheels
+	[SerializeField] bool enableWheel; // Use a steering wheel to manually drive the car (I have only tested a Logitech G29)
+	[SerializeField] bool drawLine; // Drop points behind the car (used for automated testing)
+	[SerializeField] GameObject[] centerLinePointCollections; // Parent objects of points previously dropped behind the car
 
-	bool trackErrors = false;
-	GameObject centerLine;
-	Vector2[] centerLinePoints;
-	byte currentLane = 0;
-	float steeringAngle = 0f;
-	List<float> errors;
-	bool currentlyRecording;
-	Rigidbody rb;
+	bool trackErrors = false; // Track the errors off of the lane's center line
+	GameObject centerLine; // The parent object of the center line point objects we are currently using
+	Vector2[] centerLinePoints; // The list of points that mark the center line of the lane
+	byte currentLane = 0; // The lane that we are currently on
+	float steeringAngle = 0f; // Raw input from the steering wheel or keyboard
+	List<float> errors; // List of past errors during automated testing
+	bool currentlyRecording; // Are we currently saving screenshots?
+	Rigidbody rb; // Physics body of the car
 
 	Vector3 initialPosition;
 	Vector3 lastPosition;
@@ -91,15 +90,10 @@ public class Car : MonoBehaviour {
 			errors.Add (error);
 		}
 
-		var currentDist = (transform.position - initialPosition).magnitude;
-		var lastDist = (lastPosition - initialPosition).magnitude;
-		if (currentDist < lastDist) print(lastDist);
-		lastPosition = transform.position;
-		
 #if UNITY_EDITOR_WIN
 		print (currentlyRecording);
 #else
-		//print (Time.timeSinceLevelLoad);
+		print (Time.timeSinceLevelLoad);
 #endif
 	}
 
@@ -126,7 +120,7 @@ public class Car : MonoBehaviour {
 			var bytes = screenShot.EncodeToPNG();
 #if UNITY_EDITOR_WIN
 			var unixTimestamp = (uint)(DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1))).TotalMilliseconds;
-			var steeringAngleText = GetSteeringAngleDegrees(steeringAngle).ToString ("F7");
+			var steeringAngleText = GetCurrentSteeringAngleDegrees(steeringAngle).ToString ("F7");
 			var filename = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
 #else
 			var filename = tmpPath + "temp.png";

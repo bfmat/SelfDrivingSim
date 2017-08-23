@@ -308,6 +308,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114738169699072222, guid: 69cd8e9933bb440a1a390a8611d415bf,
+        type: 2}
+      propertyPath: enableWheel
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 69cd8e9933bb440a1a390a8611d415bf, type: 2}
   m_IsPrefabParent: 0
