@@ -10,10 +10,13 @@ public class Car : MonoBehaviour {
 	const float steeringAngleMultiplier = 0.1f; // Scaling factor for the steering wheel input 
 	const float minSteeringBump = 0.005f; // The amount to increase the steering angle per key press (for keyboard controls)
 	const float torque = 16f; // Torque to constantly apply to the front wheels
-	const float timeSpentOnLane = 400f; // During automated tests, spend this many seconds on each individual lane
+	const float timeSpentOnLane = 100f; // During automated tests, spend this many seconds on each individual lane
 	const float wheelBase = 0.914f; // The distance from the center of the front wheels to the center of the back wheels
 	const int resWidth = 200, resHeight = 150; // Width and height of saved screenshots
 	const string tmpPath = "/tmp/"; // Path to save images in during autonomous driving
+	const bool useLowPassFilter = true;
+
+	readonly float[] lowPassParameters = { 1.0f, 0.3f, 0.2f, 0.1f }; // The weights of recent past steering angles in the low pass filters
 
 	[SerializeField] DrivingMode drivingMode; // Manual, recording, autonomous, automated test
 	[SerializeField] WheelCollider[] driveWheels; // The two front wheels
@@ -24,11 +27,13 @@ public class Car : MonoBehaviour {
 	bool trackErrors = false; // Track the errors off of the lane's center line
 	GameObject centerLine; // The parent object of the center line point objects we are currently using
 	Vector2[] centerLinePoints; // The list of points that mark the center line of the lane
-	byte currentLane = 0; // The lane that we are currently on
+	int currentLane = 0; // The lane that we are currently on
+	int numLanes; // How many lanes there are
 	float steeringAngle = 0f; // Raw input from the steering wheel or keyboard
 	List<float> errors; // List of past errors during automated testing
 	bool currentlyRecording; // Are we currently saving screenshots?
 	Rigidbody rb; // Physics body of the car
+	float[] previousSteeringAngles; // Past steering angles output by network, used for low pass filter
 
 	Vector3 initialPosition;
 	Vector3 lastPosition;
@@ -47,8 +52,10 @@ public class Car : MonoBehaviour {
 
 		if (drivingMode != DrivingMode.Manual) {
 			StartCoroutine (RecordFrame ());
-			if (drivingMode != DrivingMode.Recording)
+			if (drivingMode != DrivingMode.Recording) {
+				previousSteeringAngles = new float[lowPassParameters.Length];
 				StartCoroutine (HandleAutonomousSteering ());
+			}
 		}
 
 		if (drawLine) {
@@ -60,6 +67,8 @@ public class Car : MonoBehaviour {
 		currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
 
 		initialPosition = transform.position;
+
+		numLanes = centerLinePointCollections.Length;
 	}
 		
 	void FixedUpdate () {
@@ -146,7 +155,8 @@ public class Car : MonoBehaviour {
 			var streamReader = new StreamReader (tmpPath + maxIndex + "sim.txt");
 			var fileContents = streamReader.ReadToEnd ();
 			var inverseTurningRadius = float.Parse (fileContents);
-			steeringAngle = InverseTurningRadiusToSteeringAngleDegrees (inverseTurningRadius);
+			var rawSteeringAngle = InverseTurningRadiusToSteeringAngleDegrees (inverseTurningRadius);
+			steeringAngle = useLowPassFilter ? LowPassFilter (rawSteeringAngle) : rawSteeringAngle;
 			yield return null;
 		}
 	}
@@ -186,31 +196,28 @@ public class Car : MonoBehaviour {
 	}
 
 	void SwitchLanes () {
-		var numLanes = centerLinePointCollections.Length;
-
 		if (currentLane > 0)
 			SaveTestResults ();
-		if (currentLane > numLanes)
-			return;
-		if (currentLane <= numLanes)
+
+		if (currentLane <= numLanes) {
+			centerLine = centerLinePointCollections [currentLane];
+			var centerLineTransforms = centerLine.GetComponentsInChildren<Transform> ();
+			var centerLinePointObjects = centerLineTransforms.Skip (1).Distinct ().ToArray ();
+			var startingPointTransform = centerLinePointObjects [0];
+			transform.position = startingPointTransform.position;
+			transform.rotation = startingPointTransform.rotation;
+			rb.velocity = Vector3.zero;
+			centerLinePoints = new Vector2[centerLinePointObjects.Length];
+	
+			for (var i = 0; i < centerLinePoints.Length; i++) {
+				var position = centerLinePointObjects [i].position;
+				centerLinePoints [i] = ProjectOntoXZPlane (position);
+			}
+				
+			errors = new List<float> ();
+			currentLane++;
 			Invoke ("SwitchLanes", timeSpentOnLane);
-
-		centerLine = centerLinePointCollections [currentLane];
-		var centerLineTransforms = centerLine.GetComponentsInChildren<Transform> ();
-		var centerLinePointObjects = centerLineTransforms.Skip (1).Distinct ().ToArray ();
-		var startingPointTransform = centerLinePointObjects [0];
-		transform.position = startingPointTransform.position;
-		transform.rotation = startingPointTransform.rotation;
-		rb.velocity = Vector3.zero;
-		centerLinePoints = new Vector2[centerLinePointObjects.Length];
-
-		for (var i = 0; i < centerLinePoints.Length; i++) {
-			var position = centerLinePointObjects [i].position;
-			centerLinePoints [i] = ProjectOntoXZPlane (position);
 		}
-			
-		errors = new List<float> ();
-		currentLane++;
 	}
 
 	void SaveTestResults () {
@@ -223,7 +230,25 @@ public class Car : MonoBehaviour {
 		var standardDeviation = Mathf.Sqrt (meanVariance);
 		print ("Standard deviation from center line was " + standardDeviation);
 		var stringErrors = Array.ConvertAll (errors.ToArray (), x => x.ToString ("F7"));
-		File.WriteAllLines ("sim/results" + currentLane + ".txt", stringErrors);
+		var outputArray = stringErrors.Concat (new [] { "Standard deviation: " + standardDeviation }).ToArray ();
+		File.WriteAllLines ("sim/results" + currentLane + ".txt", outputArray);
+	}
+
+	float LowPassFilter (float rawSteeringAngle) {
+		for (var i = 0; i < previousSteeringAngles.Length - 1; i++) {
+			previousSteeringAngles [i + 1] = previousSteeringAngles [i];
+		}
+		previousSteeringAngles [0] = rawSteeringAngle;
+
+		var weightedAngleSum = 0f;
+		var parameterSum = 0f;
+		for (var i = 0; i < previousSteeringAngles.Length; i++) {
+			parameterSum += lowPassParameters [i];
+			var weightedAngle = previousSteeringAngles [i] * lowPassParameters [i];
+			weightedAngleSum += weightedAngle;
+		}
+
+		return weightedAngleSum / parameterSum;
 	}
 
 	float InverseTurningRadiusToSteeringAngleDegrees (float inverseTurningRadius) {
