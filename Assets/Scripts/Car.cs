@@ -13,7 +13,7 @@ sealed class Car : MonoBehaviour {
 	const float timeSpentOnLane = 100f; // During automated tests, spend this many seconds on each individual lane
 	const int resWidth = 200, resHeight = 150; // Width and height of saved screenshots
 	const string tmpPath = "/tmp/"; // Path to save images in during autonomous driving
-	const bool useLowPassFilter = true;
+	const bool useLowPassFilter = true; // Apply the low pass filter in Utility to steering angles in autonomous mode
 
 	[SerializeField] DrivingMode drivingMode; // Manual, recording, autonomous, automated test
 	[SerializeField] WheelCollider[] driveWheels; // The two front wheels

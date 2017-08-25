@@ -7,7 +7,7 @@ using System.Collections.Generic;
 static class Utility {
 
 	const float wheelBase = 0.914f; // The distance from the center of the front wheels to the center of the back wheels
-	readonly static float[] lowPassParameters = { 1.0f, 0.3f, 0.2f, 0.1f }; // The weights of recent past steering angles in the low pass filters
+	readonly static float[] lowPassParameters = { 1.0f, 0.8f, 0.3f, 0.1f }; // The weights of recent past steering angles in the low pass filters
 	static float[] previousSteeringAngles; // Past steering angles output by network, used for low pass filter
 	static List<float> errors = new List<float> (); // List of past errors during automated testing
 
