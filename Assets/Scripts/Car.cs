@@ -94,16 +94,16 @@ sealed class Car : MonoBehaviour {
 #if UNITY_EDITOR_WIN
 		print (currentlyRecording);
 #else
-		print (Time.timeSinceLevelLoad);
+        print(steeringAngle);
 #endif
 	}
 
 	IEnumerator RecordFrame () {
 		var camera = GetComponentInChildren<Camera> ();
-#if UNITY_EDITOR_LINUX
-		for (var i = 0; true; i++) {
+#if UNITY_EDITOR_WIN
+        while (true) {
 #else
-		while (true) {
+        for (var i = 0; true; i++) {
 #endif
 			do {
 				yield return new WaitForEndOfFrame ();
@@ -127,7 +127,7 @@ sealed class Car : MonoBehaviour {
 			var filename = tmpPath + "temp.png";
 #endif
 			File.WriteAllBytes(filename, bytes);
-#if UNITY_EDITOR_LINUX
+#if !UNITY_EDITOR_WIN
 			File.Move (tmpPath + "temp.png", tmpPath + "sim" + i + ".png");
 #endif
 			yield return new WaitForEndOfFrame ();
