@@ -27,8 +27,8 @@ InputManager:
     descriptiveNegativeName: Disable image capturing in Recording mode
     negativeButton: joystick 1 button 5
     positiveButton: joystick 1 button 4
-    altNegativeButton: 
-    altPositiveButton: 
+    altNegativeButton: s
+    altPositiveButton: r
     gravity: 0
     dead: 0
     sensitivity: 1000
