@@ -149,7 +149,6 @@ sealed class Car : MonoBehaviour
             {
                 fileName = tmpPath + "temp.png";
             }
-            print(fileName);
             // Write the contents of the image to a file
             File.WriteAllBytes(fileName, encodedImage);
             // If we are not recording, move the temp file to a permanent numbered filename
