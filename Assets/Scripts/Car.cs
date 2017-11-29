@@ -133,27 +133,28 @@ sealed class Car : MonoBehaviour
             var encodedImage = screenShot.EncodeToPNG();
 
             // File to save the screenshot in
-            string filename;
+            string fileName;
             // If we are in recording mode, name the file using the current timestamp
-            if (currentlyRecording)
+            if (drivingMode == DrivingMode.Recording)
             {
                 // Get the present Unix timestamp in milliseconds
                 var unixTimestamp = (uint)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
                 // Convert it to a string with 7 digits of precision
                 var steeringAngleText = currentSteeringAngleDegrees.ToString("F7");
                 // Save the file in the `sim` subfolder of the project folder
-                filename = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
+                fileName = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
             }
             // Otherwise, save the file in the temp folder
             else
             {
-                filename = tmpPath + "temp.png";
+                fileName = tmpPath + "temp.png";
             }
+            print(fileName);
             // Write the contents of the image to a file
-            File.WriteAllBytes(filename, encodedImage);
-            // If we are recording, move the temp file to a permanent numbered filename
+            File.WriteAllBytes(fileName, encodedImage);
+            // If we are not recording, move the temp file to a permanent numbered filename
             // This is done so that the files are never read by other programs when partially written
-            if (currentlyRecording)
+            if (drivingMode != DrivingMode.Recording)
             {
                 File.Move(tmpPath + "temp.png", tmpPath + "sim" + i + ".png");
             }
