@@ -34,6 +34,9 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
+# OS files
+.DS_Store
+
 # Experimental data folder
 Results/
 

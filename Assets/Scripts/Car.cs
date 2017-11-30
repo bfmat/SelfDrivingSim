@@ -12,7 +12,7 @@ sealed class Car : MonoBehaviour
     const float minSteeringBump = 0.005f; // The amount to increase the steering angle per key press (for keyboard controls)
     const float torque = 16f; // Torque to constantly apply to the front wheels
     const float timeSpentOnLane = 100f; // During automated tests, spend this many seconds on each individual lane
-    const int resWidth = 200, resHeight = 150; // Width and height of saved screenshots
+    const int resWidth = 320, resHeight = 180; // Width and height of saved screenshots
     const string tmpPath = "/tmp/"; // Path to save images in during autonomous driving
     const bool useLowPassFilter = true; // Apply the low pass filter in Utility to steering angles in autonomous mode
 
