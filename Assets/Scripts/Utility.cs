@@ -90,20 +90,6 @@ static class Utility
         return weightedAngleSum / parameterSum;
     }
 
-    internal static float InverseTurningRadiusToSteeringAngleDegrees(float inverseTurningRadius)
-    {
-        var wheelAngleRadians = Mathf.Atan(inverseTurningRadius * wheelBase);
-        var wheelAngleDegrees = wheelAngleRadians * Mathf.Rad2Deg;
-        return wheelAngleDegrees;
-    }
-
-    internal static float SteeringAngleDegreesToInverseTurningRadius(float wheelAngleDegrees)
-    {
-        var wheelAngleRadians = wheelAngleDegrees * Mathf.Deg2Rad;
-        var inverseTurningRadius = Mathf.Tan(wheelAngleRadians) / wheelBase;
-        return inverseTurningRadius;
-    }
-
     internal static Vector2 ProjectOntoXZPlane(Vector3 _3DPoint)
     {
         var _2DPoint = new Vector2(_3DPoint.x, _3DPoint.z);

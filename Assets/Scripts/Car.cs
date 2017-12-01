@@ -179,8 +179,7 @@ sealed class Car : MonoBehaviour
             }
             var streamReader = new StreamReader(tmpPath + maxIndex + "sim.txt");
             var fileContents = streamReader.ReadToEnd();
-            var inverseTurningRadius = float.Parse(fileContents);
-            var rawSteeringAngle = Utility.InverseTurningRadiusToSteeringAngleDegrees(inverseTurningRadius);
+            var rawSteeringAngle = float.Parse(fileContents);
             steeringAngle = useLowPassFilter ? Utility.LowPassFilter(rawSteeringAngle) : rawSteeringAngle;
             yield return null;
         }
