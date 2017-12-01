@@ -13,47 +13,43 @@ static class Utility
     static float[] previousSteeringAngles; // Past steering angles output by network, used for low pass filter
     static List<float> errors = new List<float>(); // List of past errors during automated testing
 
+    // Static initializer that is called when the class is created
     static Utility()
     {
+        // Initialize the previous steering angles so its length is the same as the number of low pass parameters
         previousSteeringAngles = new float[lowPassParameters.Length];
     }
 
+    // Used to calculate the error off of a 2D center line of a 3D point projected into the same two dimensions as the line
     internal static void CalculateCenterLineError(Vector2[] centerLinePoints, Vector3 position)
     {
-        var firstPoint = centerLinePoints[0];
-        var secondPoint = centerLinePoints[1];
+        // Project the position of the car onto a 2D plane, essentially removing the vertical position
         var carPosition = ProjectOntoXZPlane(position);
-        var firstDelta = (carPosition - firstPoint).sqrMagnitude;
-        var secondDelta = (carPosition - secondPoint).sqrMagnitude;
+        // For each of the points along the center of the road, calculate the squared distance from that point to the position of the car in two dimensions
+        var centerLineDistancesFromCar = from point in centerLinePoints select (carPosition - point).sqrMagnitude;
+        // Find the two smallest distances in the list, and use those to get the two points closest to the car by getting the index of the distance and getting the same index in the list of center line points
+        var closestPoints = (
+            from distance in centerLineDistancesFromCar
+            orderby distance ascending
+            select centerLinePoints[Array.IndexOf(centerLineDistancesFromCar.ToArray(), distance)]
+        ).Take(2).ToArray();
+        // Get the first and second closest points out of the list
+        var firstPoint = closestPoints[0];
+        var secondPoint = closestPoints[1];
 
-        foreach (var point in centerLinePoints)
-        {
-            if (point == firstPoint || point == secondPoint)
-                continue;
-            var pointDelta = (carPosition - point).sqrMagnitude;
-            if (pointDelta < firstDelta)
-            {
-                secondPoint = firstPoint;
-                secondDelta = firstDelta;
-                firstPoint = point;
-                firstDelta = pointDelta;
-            }
-            else if (pointDelta < secondDelta)
-            {
-                secondPoint = point;
-                secondDelta = pointDelta;
-            }
-        }
-
+        // Calculate the slope and the Y-intercept of the line between the two points
         var riseRun = secondPoint - firstPoint;
         var slope = riseRun.y / riseRun.x;
         var intercept = firstPoint.y - (firstPoint.x * slope);
+        // Calculate the slope and Y-intercept of the perpendicular line that passes through the car's position
         var perpendicularSlope = -1 / slope;
         var distanceLineIntercept = carPosition.y - (carPosition.x * perpendicularSlope);
-
+        // Use the perpendicular line to project the position of the car onto the line between the two points on the center line closest to the car
         var xProjection = (distanceLineIntercept - intercept) / (slope - perpendicularSlope);
         var projection = new Vector2(xProjection, (slope * xProjection) + intercept);
+        // Using the projected point, calculate the squared distance of the car from the nearest point on the center line
         var variance = (carPosition - projection).sqrMagnitude;
+        // Add it to the list of variances
         errors.Add(variance);
     }
 
