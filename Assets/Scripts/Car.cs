@@ -7,29 +7,48 @@ using System.Collections;
 // The main car class that handles movement and recording
 sealed class Car : MonoBehaviour
 {
+    // Scaling factor for the steering wheel input 
+    const float steeringAngleMultiplier = 0.1f;
+    // The amount to increase the steering angle per key press (for keyboard controls)
+    const float minSteeringBump = 0.005f;
+    // Torque to constantly apply to the front wheels
+    const float torque = 16f;
+    // During automated tests, spend this many seconds on each individual lane
+    const float timeSpentOnLane = 100f;
+    // Width and height of saved screenshots
+    const int resWidth = 320, resHeight = 180;
+    // Path to save images in during autonomous driving
+    const string tmpPath = "/tmp/";
+    // Apply the low pass filter in Utility to steering angles in autonomous mode
+    const bool useLowPassFilter = true;
 
-    const float steeringAngleMultiplier = 0.1f; // Scaling factor for the steering wheel input 
-    const float minSteeringBump = 0.005f; // The amount to increase the steering angle per key press (for keyboard controls)
-    const float torque = 16f; // Torque to constantly apply to the front wheels
-    const float timeSpentOnLane = 100f; // During automated tests, spend this many seconds on each individual lane
-    const int resWidth = 320, resHeight = 180; // Width and height of saved screenshots
-    const string tmpPath = "/tmp/"; // Path to save images in during autonomous driving
-    const bool useLowPassFilter = true; // Apply the low pass filter in Utility to steering angles in autonomous mode
+    // Manual, recording, autonomous, automated test
+    [SerializeField] DrivingMode drivingMode;
+    // The two front wheels
+    [SerializeField] WheelCollider[] driveWheels;
+    // Use a steering wheel to manually drive the car (I have only tested a Logitech G29)
+    [SerializeField] bool enableWheel;
+    // Drop points behind the car (used for automated testing)
+    [SerializeField] bool drawLine;
+    // Parent objects of points previously dropped behind the car
+    [SerializeField] GameObject[] centerLinePointCollections;
 
-    [SerializeField] DrivingMode drivingMode; // Manual, recording, autonomous, automated test
-    [SerializeField] WheelCollider[] driveWheels; // The two front wheels
-    [SerializeField] bool enableWheel; // Use a steering wheel to manually drive the car (I have only tested a Logitech G29)
-    [SerializeField] bool drawLine; // Drop points behind the car (used for automated testing)
-    [SerializeField] GameObject[] centerLinePointCollections; // Parent objects of points previously dropped behind the car
-
-    bool trackErrors = false; // Track the errors off of the lane's center line
-    GameObject centerLine; // The parent object of the center line point objects we are currently using
-    Vector2[] centerLinePoints; // The list of points that mark the center line of the lane
-    int currentLane = 0; // The lane that we are currently on
-    int numLanes; // How many lanes there are
-    float steeringAngle = 0f; // Raw input from the steering wheel or keyboard
-    bool currentlyRecording; // Are we currently saving screenshots?
-    Rigidbody rb; // Physics body of the car
+    // Track the errors off of the lane's center line
+    bool trackErrors = false;
+    // The parent object of the center line point objects we are currently using
+    GameObject centerLine;
+    // The list of points that mark the center line of the lane
+    Vector2[] centerLinePoints;
+    // The lane that we are currently on
+    int currentLane = 0;
+    // How many lanes there are
+    int numLanes;
+    // Raw input from the steering wheel or keyboard
+    float steeringAngle = 0f;
+    // Are we currently saving screenshots?
+    bool currentlyRecording;
+    // Physics body of the car
+    Rigidbody rb;
 
     void Start()
     {
@@ -86,7 +105,7 @@ sealed class Car : MonoBehaviour
 
         foreach (var driveWheel in driveWheels)
         {
-            driveWheel.steerAngle = currentSteeringAngleDegrees;
+            driveWheel.steerAngle = scaledSteeringAngleDegrees;
             driveWheel.motorTorque = torque;
         }
 
@@ -140,7 +159,7 @@ sealed class Car : MonoBehaviour
                 // Get the present Unix timestamp in milliseconds
                 var unixTimestamp = (uint)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
                 // Convert it to a string with 7 digits of precision
-                var steeringAngleText = currentSteeringAngleDegrees.ToString("F7");
+                var steeringAngleText = scaledSteeringAngleDegrees.ToString("F7");
                 // Save the file in the `sim` subfolder of the project folder
                 fileName = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
             }
@@ -212,27 +231,27 @@ sealed class Car : MonoBehaviour
         }
     }
 
-    void DrawCenterLinePoint()
+    // Get the current steering angle in degrees, multiplied by the coefficient that scales the angle of the wheels
+    float scaledSteeringAngleDegrees
     {
-        var point = new GameObject("Point");
-        point.transform.position = transform.position;
-        point.transform.SetParent(centerLine.transform);
-    }
-
-    float currentSteeringAngleDegrees
-    {
+        // This is a read-only property, so only a getter is provided
         get
         {
-            var steeringAngleDegrees = 90f * steeringAngle * steeringAngleMultiplier;
-            return steeringAngleDegrees;
+            // Scale it so that -1 represents 90 degrees to the right and 1 represents 90 degrees to the right, and scale that by the constant multiplier
+            return 90f * steeringAngle * steeringAngleMultiplier;
         }
     }
 
+    // An enum containing the possible states of the car
     enum DrivingMode
     {
+        // Driven manually without recording
+        Manual,
+        // Manual mode while saving images for training purposes
         Recording,
+        // Controlled autonomously without analysis
         Autonomous,
-        AutonomousVarianceTest,
-        Manual
+        // Autonomous mode plus saving information related to the car's distance from the center of the road
+        AutonomousVarianceTest
     }
 }
