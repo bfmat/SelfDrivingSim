@@ -50,54 +50,79 @@ sealed class Car : MonoBehaviour
     // Physics body of the car
     Rigidbody rb;
 
+    // Main initialization function
     void Start()
     {
+        // If we are testing the car's standard deviation from the center line
         if (drivingMode == DrivingMode.AutonomousVarianceTest)
         {
-            rb = GetComponent<Rigidbody>();
+            // Set the car's position to the first lane
             SwitchLanes();
+            // Set the flag so that errors will be tracked and recorded
             trackErrors = true;
+            // Do everything else in regular autonomous mode
             drivingMode = DrivingMode.Autonomous;
         }
 
+        // For each of the car's wheel colliders
         foreach (var wheel in GetComponentsInChildren<WheelCollider>())
         {
+            // Configure the wheel's physical properties
             wheel.ConfigureVehicleSubsteps(5f, 12, 15);
         }
 
+        // If the car is in recording or autonomous mode
         if (drivingMode != DrivingMode.Manual)
         {
+            // Start recording images
             StartCoroutine(RecordFrame());
-            if (drivingMode != DrivingMode.Recording)
+            // If we are in autonomous mode
+            if (drivingMode == DrivingMode.Autonomous)
             {
+                // Start automatic control of the steering angle
                 StartCoroutine(HandleAutonomousSteering());
             }
         }
 
+        // If we are currently dropping points behind the car
         if (drawLine)
         {
+            // Create an empty center line object that will serve as the parent of all the center line points
             centerLine = new GameObject("Center Line");
             centerLine.transform.position = Vector3.zero;
+            // Start running the function that drops points on the center line twice per second
             InvokeRepeating("DrawCenterLinePoint", 0.5f, 0.5f);
         }
 
-        currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
+        // Get the robot's rigidbody and store it in a global variable
+        rb = GetComponent<Rigidbody>();
 
+        // Set the global variable containing the number of lanes
         numLanes = centerLinePointCollections.Length;
+
+        // If either the wheel is disabled, or we are not in recording mode, enable recording right away (this is so that we do not have to press a button to go into autonomous driving)
+        currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
     }
 
+    // Update function, called 50 times per second
     void FixedUpdate()
     {
+        // If we are in recording or manual mode
         if (drivingMode != DrivingMode.Autonomous)
         {
+            // If the steering wheel is enabled
             if (enableWheel)
             {
+                // Set the steering angle using the steering wheel's input
                 steeringAngle = Input.GetAxis("Steering");
             }
+            // Otherwise if the steering is disabled
             else
             {
+                // If the A key is pressed, move the steering angle to the left
                 if (Input.GetKey(KeyCode.A))
                     steeringAngle -= minSteeringBump;
+                // If the D key is pressed, move the steering angle to the right
                 if (Input.GetKey(KeyCode.D))
                     steeringAngle += minSteeringBump;
             }
@@ -229,6 +254,17 @@ sealed class Car : MonoBehaviour
             currentLane++;
             Invoke("SwitchLanes", timeSpentOnLane);
         }
+    }
+
+    // A function to create a child point of the center line at the robot's current position
+    void DrawCenterLinePoint()
+    {
+        // Create the empty point object
+        var point = new GameObject("Point");
+        // Set its position to the robot's current position
+        point.transform.position = transform.position;
+        // Set the parent of the point to the global center line game object
+        point.transform.SetParent(centerLine.transform);
     }
 
     // Get the current steering angle in degrees, multiplied by the coefficient that scales the angle of the wheels
