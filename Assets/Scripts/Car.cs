@@ -53,6 +53,9 @@ sealed class Car : MonoBehaviour
     // Main initialization function
     void Start()
     {
+        // Get the robot's rigidbody and store it in a global variable
+        rb = GetComponent<Rigidbody>();
+
         // If we are testing the car's standard deviation from the center line
         if (drivingMode == DrivingMode.AutonomousVarianceTest)
         {
@@ -94,14 +97,15 @@ sealed class Car : MonoBehaviour
             InvokeRepeating("DrawCenterLinePoint", 0.5f, 0.5f);
         }
 
-        // Get the robot's rigidbody and store it in a global variable
-        rb = GetComponent<Rigidbody>();
-
         // Set the global variable containing the number of lanes
         numLanes = centerLinePointCollections.Length;
 
         // If either the wheel is disabled, or we are not in recording mode, enable recording right away (this is so that we do not have to press a button to go into autonomous driving)
         currentlyRecording = (drivingMode != DrivingMode.Recording) || !enableWheel;
+
+        // Set each of the drive wheels' torque to the predefined torque value
+        foreach (var driveWheel in driveWheels)
+            driveWheel.motorTorque = torque;
     }
 
     // Update function, called 50 times per second
@@ -128,18 +132,20 @@ sealed class Car : MonoBehaviour
             }
         }
 
+        // Set each of the drive wheels' steering angles to the steering angle converted to degrees and scaled
         foreach (var driveWheel in driveWheels)
-        {
             driveWheel.steerAngle = scaledSteeringAngleDegrees;
-            driveWheel.motorTorque = torque;
-        }
 
+        // Get the value from the buttons that tell the car to start or stop recording
         var recordingButton = Input.GetAxisRaw("EnableRecording");
+        // If the positive button is pressed, recording must be enabled
         if (recordingButton > 0)
             currentlyRecording = true;
+        // If the negative button is pressed, recording must be disabled
         else if (recordingButton < 0)
             currentlyRecording = false;
 
+        // If the car should currently be tracking errors, call the function to calculate the center line error and store it in a list
         if (trackErrors)
             Utility.CalculateCenterLineError(centerLinePoints, transform.position);
     }
@@ -207,51 +213,73 @@ sealed class Car : MonoBehaviour
         }
     }
 
+    // Coroutine that manages autonomous steering in the background
     IEnumerator HandleAutonomousSteering()
     {
+        // There are text files in the temp folder with names of the format <temp directory>/#sim.txt
+        // Store the sim.txt suffix in a constant
+        const string fileSuffix = "sim.txt";
+        // Calculate the starting index of the number in these files' full paths
+        int startingIndex = tmpPath.Length;
+        // Calculate the length of all parts of the path except for the number, used to calculate the length of the number during the substring operation
+        int pathLengthExcludingNumber = startingIndex + fileSuffix.Length;
+
+        // Loop forever, parallel to the main thread
         while (true)
         {
-            var maxIndex = -1;
-            foreach (var path in Directory.GetFiles(tmpPath))
-            {
-                if (path.Contains("sim.txt"))
-                {
-                    var index = int.Parse(path.Substring(tmpPath.Length, path.Length - (7 + tmpPath.Length)));
-                    if (index > maxIndex)
-                        maxIndex = index;
-                }
-            }
-            var streamReader = new StreamReader(tmpPath + maxIndex + "sim.txt");
+            // The file of the above format with the greatest numeric prefix needs to be found
+            // Get the names of all of these files and convert the numeric prefixes to integers, choosing the maximum (most recent) file index
+            var maxIndex = (
+                from path in Directory.GetFiles(tmpPath)
+                where path.Contains(fileSuffix)
+                select int.Parse(path.Substring(startingIndex, path.Length - pathLengthExcludingNumber))
+            ).Max();
+
+            // Create a stream reader and read the corresponding file's entire contents
+            var streamReader = new StreamReader(tmpPath + maxIndex + fileSuffix);
             var fileContents = streamReader.ReadToEnd();
+            // Convert the file contents to a decimal number
             var rawSteeringAngle = float.Parse(fileContents);
+            // If the low pass filter is enabled, pass the steering angle through it; otherwise, use the raw steering angle directly
             steeringAngle = useLowPassFilter ? Utility.LowPassFilter(rawSteeringAngle) : rawSteeringAngle;
+
+            // Continue executing again as soon as possible
             yield return null;
         }
     }
 
+    // Function for switching to the next lane during autonomous testing mode
     void SwitchLanes()
     {
+        // If we are not switching into the first lane, save the test results so far
         if (currentLane > 0)
             Utility.SaveTestResults(currentLane);
 
+        // If we have not exceeded the maximum number of lanes
         if (currentLane <= numLanes)
         {
+            // Set the center line points to the collection corresponding to the next lane
             centerLine = centerLinePointCollections[currentLane];
+            // Get all child points of the center line
             var centerLineTransforms = centerLine.GetComponentsInChildren<Transform>();
+            // Skip the first element (which corresponds to the parent center line object itself) and convert the rest of the transforms to an array
             var centerLinePointObjects = centerLineTransforms.Skip(1).Distinct().ToArray();
+            // Get the first point and set the car's position and rotation to that of the initial point
             var startingPointTransform = centerLinePointObjects[0];
             transform.position = startingPointTransform.position;
             transform.rotation = startingPointTransform.rotation;
+            // Set the car's velocity to zero to prevent it from carrying over momentum from the previous lane
             rb.velocity = Vector3.zero;
-            centerLinePoints = new Vector2[centerLinePointObjects.Length];
 
-            for (var i = 0; i < centerLinePoints.Length; i++)
-            {
-                var position = centerLinePointObjects[i].position;
-                centerLinePoints[i] = Utility.ProjectOntoXZPlane(position);
-            }
+            // Project each of the points' 3D positions onto a 2D plane and store them in the global array
+            centerLinePoints = (
+                from centerLinePointObject in centerLinePointObjects
+                select Utility.ProjectOntoXZPlane(centerLinePointObject.transform.position)
+            ).ToArray();
 
+            // Increment the current lane number
             currentLane++;
+            // Switch lanes once a certain amount of time has passed
             Invoke("SwitchLanes", timeSpentOnLane);
         }
     }
