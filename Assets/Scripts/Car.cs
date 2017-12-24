@@ -41,7 +41,7 @@ sealed class Car : MonoBehaviour
     int currentLane = 0;
     // How many lanes there are
     int numLanes;
-    // The angle in quarter rotations to set the angle of the drive wheels to
+    // The angle in degrees to set the angle of the drive wheels to
     float wheelAngle = 0f;
     // Are we currently saving screenshots?
     bool currentlyRecording;
@@ -130,9 +130,9 @@ sealed class Car : MonoBehaviour
             }
         }
 
-        // Set each of the drive wheels' steering angles to the steering angle converted to degrees and scaled
+        // Set each of the drive wheels' steering angles to the global wheel angle
         foreach (var driveWheel in driveWheels)
-            driveWheel.steerAngle = scaledWheelAngleDegrees;
+            driveWheel.steerAngle = wheelAngle;
 
         // Get the value from the buttons that tell the car to start or stop recording
         var recordingButton = Input.GetAxisRaw("EnableRecording");
@@ -188,7 +188,7 @@ sealed class Car : MonoBehaviour
                 // Get the present Unix timestamp in milliseconds
                 var unixTimestamp = (uint)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
                 // Convert it to a string with 7 digits of precision
-                var wheelAngleText = scaledWheelAngleDegrees.ToString("F7");
+                var wheelAngleText = wheelAngle.ToString("F7");
                 // Save the file in the `sim` subfolder of the project folder
                 fileName = "sim/" + unixTimestamp + "_" + wheelAngleText + ".png";
             }
@@ -291,17 +291,6 @@ sealed class Car : MonoBehaviour
         point.transform.position = transform.position;
         // Set the parent of the point to the global center line game object
         point.transform.SetParent(centerLine.transform);
-    }
-
-    // Get the current steering angle in degrees, multiplied by the coefficient that scales the angle of the wheels
-    float scaledWheelAngleDegrees
-    {
-        // This is a read-only property, so only a getter is provided
-        get
-        {
-            // Scale it so that -1 represents 90 degrees to the right and 1 represents 90 degrees to the right, and scale that by the constant multiplier
-            return 90f * wheelAngle * wheelAngleMultiplier;
-        }
     }
 
     // An enum containing the possible states of the car
