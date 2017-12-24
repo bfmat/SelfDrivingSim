@@ -7,24 +7,8 @@ using System.Collections.Generic;
 // A collection of utility functions called at various times in the car class
 static class Utility
 {
-    // The weights of recent past steering angles in the low pass filters
-    readonly static float[] lowPassParameters = { 1.0f, 0.8f, 0.3f, 0.1f };
-    // The sum of all of the low pass filter parameters, used in the low pass filter calculations
-    readonly static float lowPassParametersSum;
-    // Past steering angles output by network, used for low pass filter
-    static float[] previousSteeringAngles;
-    // List of past squared errors during automated testing
+   // List of past squared errors during automated testing
     static List<float> squaredErrors = new List<float>();
-
-    // Static initializer that is called when the class is created
-    static Utility()
-    {
-        // Initialize the previous steering angles so its length is the same as the number of low pass parameters
-        previousSteeringAngles = new float[lowPassParameters.Length];
-
-        // Calculate the sum of the low pass filter parameters and store them in the global constant
-        lowPassParametersSum = lowPassParameters.Sum();
-    }
 
     // Used to calculate the error off of a 2D center line of a 3D point projected into the same two dimensions as the line
     internal static void CalculateCenterLineError(Vector2[] centerLinePoints, Vector3 position)
@@ -75,33 +59,6 @@ static class Utility
         File.WriteAllLines("sim/results" + fileNumber + ".txt", outputArray);
         // Clear the list of squared errors
         squaredErrors = new List<float>();
-    }
-
-    // A simple low pass filter that removes high-frequency noise from the autonomous driving system's output so that the car drives more smoothly
-    internal static float LowPassFilter(float rawSteeringAngle)
-    {
-        // Iterate over all of the previous steering angles except for the last one, and shift them down to the end of the array
-        for (var i = 0; i < previousSteeringAngles.Length - 1; i++)
-        {
-            previousSteeringAngles[i + 1] = previousSteeringAngles[i];
-        }
-        // Now that the first slot in the steering array has been freed up, set it to the current steering angle
-        previousSteeringAngles[0] = rawSteeringAngle;
-
-        // An accumulator for weighted angles
-        var weightedAngleSum = 0f;
-        // Iterate over the array of steering angles, which should have the same length as the array of low pass filter parameters
-        for (var i = 0; i < previousSteeringAngles.Length; i++)
-        {
-            // Multiply the steering angle by the corresponding parameter to get a weighted angle
-            var weightedAngle = previousSteeringAngles[i] * lowPassParameters[i];
-            // Add it to the accumulator
-            weightedAngleSum += weightedAngle;
-        }
-        // Divide the accumulator by the sum of the low pass parameters to get what is essentially a weighted average of the array of the most recent steering angles including the angle just added
-        var nextSteeringAngle = weightedAngleSum / lowPassParametersSum;
-        // Return this weighted average, which is used as the next steering angle
-        return nextSteeringAngle;
     }
 
     // Project a three-dimensional point onto a two-dimensional plane by removing the Y value (vertical axis)

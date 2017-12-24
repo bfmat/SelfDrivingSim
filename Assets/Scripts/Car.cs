@@ -14,13 +14,10 @@ sealed class Car : MonoBehaviour
     // Torque to constantly apply to the front wheels
     const float torque = 16f;
     // During automated tests, spend this many seconds on each individual lane
-    const float timeSpentOnLane = 100f;
     // Width and height of saved screenshots
     const int resWidth = 320, resHeight = 180;
     // Path to save images in during autonomous driving
     const string tmpPath = "/tmp/";
-    // Apply the low pass filter in Utility to steering angles in autonomous mode
-    const bool useLowPassFilter = true;
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
@@ -239,9 +236,7 @@ sealed class Car : MonoBehaviour
             var streamReader = new StreamReader(tmpPath + maxIndex + fileSuffix);
             var fileContents = streamReader.ReadToEnd();
             // Convert the file contents to a decimal number
-            var rawSteeringAngle = float.Parse(fileContents);
-            // If the low pass filter is enabled, pass the steering angle through it; otherwise, use the raw steering angle directly
-            steeringAngle = useLowPassFilter ? Utility.LowPassFilter(rawSteeringAngle) : rawSteeringAngle;
+            steeringAngle = float.Parse(fileContents);
 
             // Continue executing again as soon as possible
             yield return null;
