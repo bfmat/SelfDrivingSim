@@ -7,13 +7,14 @@ using System.Collections;
 // The main car class that handles movement and recording
 sealed class Car : MonoBehaviour
 {
-    // Scaling factor for the steering wheel input 
-    const float steeringAngleMultiplier = 0.1f;
+    // Scaling factor for the wheel angle
+    const float wheelAngleMultiplier = 0.1f;
     // The amount to increase the steering angle per key press (for keyboard controls)
     const float minSteeringBump = 0.005f;
     // Torque to constantly apply to the front wheels
     const float torque = 16f;
     // During automated tests, spend this many seconds on each individual lane
+    const float timeSpentOnLane = 100f;
     // Width and height of saved screenshots
     const int resWidth = 320, resHeight = 180;
     // Path to save images in during autonomous driving
@@ -40,8 +41,8 @@ sealed class Car : MonoBehaviour
     int currentLane = 0;
     // How many lanes there are
     int numLanes;
-    // Raw input from the steering wheel or keyboard
-    float steeringAngle = 0f;
+    // The angle in quarter rotations to set the angle of the drive wheels to
+    float wheelAngle = 0f;
     // Are we currently saving screenshots?
     bool currentlyRecording;
     // Physics body of the car
@@ -114,24 +115,24 @@ sealed class Car : MonoBehaviour
             // If the steering wheel is enabled
             if (enableWheel)
             {
-                // Set the steering angle using the steering wheel's input
-                steeringAngle = Input.GetAxis("Steering");
+                // Set the wheel angle using the steering wheel's input
+                wheelAngle = Input.GetAxis("Steering");
             }
             // Otherwise if the steering is disabled
             else
             {
                 // If the A key is pressed, move the steering angle to the left
                 if (Input.GetKey(KeyCode.A))
-                    steeringAngle -= minSteeringBump;
+                    wheelAngle -= minSteeringBump;
                 // If the D key is pressed, move the steering angle to the right
                 if (Input.GetKey(KeyCode.D))
-                    steeringAngle += minSteeringBump;
+                    wheelAngle += minSteeringBump;
             }
         }
 
         // Set each of the drive wheels' steering angles to the steering angle converted to degrees and scaled
         foreach (var driveWheel in driveWheels)
-            driveWheel.steerAngle = scaledSteeringAngleDegrees;
+            driveWheel.steerAngle = scaledWheelAngleDegrees;
 
         // Get the value from the buttons that tell the car to start or stop recording
         var recordingButton = Input.GetAxisRaw("EnableRecording");
@@ -187,9 +188,9 @@ sealed class Car : MonoBehaviour
                 // Get the present Unix timestamp in milliseconds
                 var unixTimestamp = (uint)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
                 // Convert it to a string with 7 digits of precision
-                var steeringAngleText = scaledSteeringAngleDegrees.ToString("F7");
+                var wheelAngleText = scaledWheelAngleDegrees.ToString("F7");
                 // Save the file in the `sim` subfolder of the project folder
-                fileName = "sim/" + unixTimestamp + "_" + steeringAngleText + ".png";
+                fileName = "sim/" + unixTimestamp + "_" + wheelAngleText + ".png";
             }
             // Otherwise, save the file in the temp folder
             else
@@ -235,8 +236,10 @@ sealed class Car : MonoBehaviour
             // Create a stream reader and read the corresponding file's entire contents
             var streamReader = new StreamReader(tmpPath + maxIndex + fileSuffix);
             var fileContents = streamReader.ReadToEnd();
-            // Convert the file contents to a decimal number
-            steeringAngle = float.Parse(fileContents);
+            // Convert the file contents to a decimal number which represents the steering angle
+            var steeringAngle = float.Parse(fileContents);
+            // Convert the steering angle to a wheel angle
+            wheelAngle = Steering.getWheelAngle(steeringAngle);
 
             // Continue executing again as soon as possible
             yield return null;
@@ -291,13 +294,13 @@ sealed class Car : MonoBehaviour
     }
 
     // Get the current steering angle in degrees, multiplied by the coefficient that scales the angle of the wheels
-    float scaledSteeringAngleDegrees
+    float scaledWheelAngleDegrees
     {
         // This is a read-only property, so only a getter is provided
         get
         {
             // Scale it so that -1 represents 90 degrees to the right and 1 represents 90 degrees to the right, and scale that by the constant multiplier
-            return 90f * steeringAngle * steeringAngleMultiplier;
+            return 90f * wheelAngle * wheelAngleMultiplier;
         }
     }
 
