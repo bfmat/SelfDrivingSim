@@ -4,7 +4,7 @@ using UnityEngine;
 static class Steering
 {
     // The width in steering angle units of the dead band
-    const float deadBandWidth = 0.05f;
+    const float deadBandWidth = 2f;
 
     // The center of the current backlash dead band in steering angle units
     static float deadBandCenter = 0f;
