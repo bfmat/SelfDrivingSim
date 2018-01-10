@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 
 // The main car class that handles movement and recording
 sealed class Car : MonoBehaviour
@@ -17,8 +18,14 @@ sealed class Car : MonoBehaviour
     const float timeSpentOnLane = 100f;
     // Width and height of saved screenshots
     const int resWidth = 320, resHeight = 180;
+    // The amount by which the steering angle is incremented by a reinforcement learning action
+    const float reinforcementSteeringBump = 0.05f;
     // Path to save images in during autonomous driving
     const string tmpPath = "/tmp/";
+    // The path to write data required by the reinforcement learning agent to
+    const string reinforcementInformationPath = "/tmp/information.json";
+    // The path to read actions calculated by the reinforcement learning agent from
+    const string reinforcementActionPath = "/tmp/action.txt";
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
@@ -47,23 +54,15 @@ sealed class Car : MonoBehaviour
     bool currentlyRecording;
     // Physics body of the car
     Rigidbody rb;
+    // List of past squared errors during automated testing
+    List<float> squaredErrors = new List<float>();
+
 
     // Main initialization function
     void Start()
     {
         // Get the robot's rigidbody and store it in a global variable
         rb = GetComponent<Rigidbody>();
-
-        // If we are testing the car's standard deviation from the center line
-        if (drivingMode == DrivingMode.AutonomousVarianceTest)
-        {
-            // Set the car's position to the first lane
-            SwitchLanes();
-            // Set the flag so that errors will be tracked and recorded
-            trackErrors = true;
-            // Do everything else in regular autonomous mode
-            drivingMode = DrivingMode.Autonomous;
-        }
 
         // For each of the car's wheel colliders
         foreach (var wheel in GetComponentsInChildren<WheelCollider>())
@@ -77,11 +76,32 @@ sealed class Car : MonoBehaviour
         {
             // Start recording images
             StartCoroutine(RecordFrame());
+
             // If we are in autonomous mode
             if (drivingMode == DrivingMode.Autonomous)
             {
                 // Start automatic control of the steering angle
                 StartCoroutine(HandleAutonomousSteering());
+            }
+
+            // If we are testing the car's standard deviation from the center line
+            else if (drivingMode == DrivingMode.AutonomousVarianceTest)
+            {
+                // Set the car's position to the first lane and continue to switch lanes in the future
+                SwitchLanes(true);
+                // Set the flag so that errors will be tracked and recorded
+                trackErrors = true;
+                // Start automatic control of the steering angle
+                StartCoroutine(HandleAutonomousSteering());
+            }
+
+            // If we are in autonomous mode for use with a reinforcement learning agent
+            else if (drivingMode == DrivingMode.AutonomousReinforcement)
+            {
+                // Set the car's position to the first lane but do not repeat
+                SwitchLanes(false);
+                // Start control of the steering angle by the agent
+                StartCoroutine(HandleReinforcementSteering());
             }
         }
 
@@ -143,9 +163,14 @@ sealed class Car : MonoBehaviour
         else if (recordingButton < 0)
             currentlyRecording = false;
 
-        // If the car should currently be tracking errors, call the function to calculate the center line error and store it in a list
+        // If the car should currently be tracking errors
         if (trackErrors)
-            Utility.CalculateCenterLineError(centerLinePoints, transform.position);
+        {
+            // Call the function to calculate the center line error 
+            var squaredError = Utility.CalculateCenterLineError(centerLinePoints, transform.position);
+            // Add it to the list of squared errors
+            squaredErrors.Add(squaredError);
+        }
     }
 
     // Coroutine to capture and save screenshots for either recording or testing
@@ -225,60 +250,104 @@ sealed class Car : MonoBehaviour
         // Loop forever, parallel to the main thread
         while (true)
         {
-            // The file of the above format with the greatest numeric prefix needs to be found
-            // Get the names of all of these files and convert the numeric prefixes to integers, choosing the maximum (most recent) file index
-            var maxIndex = (
-                from path in Directory.GetFiles(tmpPath)
-                where path.Contains(fileSuffix)
-                select int.Parse(path.Substring(startingIndex, path.Length - pathLengthExcludingNumber))
-            ).Max();
+            // If the car is in regular autonomous mode
+            if (drivingMode == DrivingMode.Autonomous)
+            {
+                // The file of the above format with the greatest numeric prefix needs to be found
+                // Get the names of all of these files and convert the numeric prefixes to integers, choosing the maximum (most recent) file index
+                var maxIndex = (
+                    from path in Directory.GetFiles(tmpPath)
+                    where path.Contains(fileSuffix)
+                    select int.Parse(path.Substring(startingIndex, path.Length - pathLengthExcludingNumber))
+                ).Max();
 
-            // Create a stream reader and read the corresponding file's entire contents
-            var streamReader = new StreamReader(tmpPath + maxIndex + fileSuffix);
-            var fileContents = streamReader.ReadToEnd();
-            // Convert the file contents to a decimal number which represents the steering angle
-            var steeringAngle = float.Parse(fileContents);
-            // Convert the steering angle to a wheel angle
-            wheelAngle = Steering.getWheelAngle(steeringAngle);
+                // Create a stream reader and read the corresponding file's entire contents
+                var streamReader = new StreamReader(tmpPath + maxIndex + fileSuffix);
+                var fileContents = streamReader.ReadToEnd();
+                // Convert the file contents to a decimal number which represents the steering angle
+                var steeringAngle = float.Parse(fileContents);
+                // Convert the steering angle to a wheel angle
+                wheelAngle = Steering.getWheelAngle(steeringAngle);
 
-            // Continue executing again as soon as possible
-            yield return null;
+                // Continue executing again as soon as possible
+                yield return null;
+            }
+        }
+    }
+
+    // Coroutine that manages steering and communication with the reinforcement learning agent
+    IEnumerator HandleReinforcementSteering()
+    {
+        // Loop forever, parallel to the main thread
+        while (true)
+        {
+            // Read the contents of the action file path
+            var actionFileContents = File.ReadAllText(reinforcementActionPath);
+            // Strip whitespace and attempt to convert the file's contents to an integer
+            int action;
+            var success = int.TryParse(actionFileContents.Trim(), out action);
+            // If parsing the file as an integer succeeded
+            if (success)
+            {
+                // Do nothing if the action is 0, subtract from the steering angle if the action is 1, and add to it if the action is 2
+                var increment = 0f;
+                switch (action)
+                {
+                    case 1:
+                        increment = -reinforcementSteeringBump;
+                        break;
+                    case 2:
+                        increment = reinforcementSteeringBump;
+                        break;
+                }
+                wheelAngle += increment;
+
+                // If the previous information has been read and deleted
+                if (!File.Exists(reinforcementInformationPath))
+                {
+                    // Calculate the present squared error from the center line
+                    var squaredError = Utility.CalculateCenterLineError(centerLinePoints, transform.position);
+                    // Use the negative squared error plus 1 as the reward function, so it will be positive when the car is within 1 unit of the road, and negative as it approaches the edges of the road
+                    var reward = -squaredError + 1f;
+                    // If the squared error is in excess of 8, end the game and teleport the car back to the starting point
+                    var done = squaredError > 8;
+                    if (done)
+                        ResetToStartingPoint();
+
+                    // Create a JSON list out of the wheel angle, the reward, and whether or not the game has ended (using lowercase for the Boolean)
+                    var jsonData = "[" + wheelAngle + "," + reward + "," + done.ToString().ToLowerInvariant() + "]";
+                    // Write the data to the information path
+                    File.WriteAllText(reinforcementInformationPath, jsonData);
+                }
+            }
+            // Wait for the next fixed update
+            yield return new WaitForFixedUpdate();
         }
     }
 
     // Function for switching to the next lane during autonomous testing mode
-    void SwitchLanes()
+    void SwitchLanes(bool repeat)
     {
         // If we are not switching into the first lane, save the test results so far
         if (currentLane > 0)
-            Utility.SaveTestResults(currentLane);
+            Utility.SaveTestResults(squaredErrors, currentLane);
 
         // If we have not exceeded the maximum number of lanes
         if (currentLane <= numLanes)
         {
             // Set the center line points to the collection corresponding to the next lane
             centerLine = centerLinePointCollections[currentLane];
-            // Get all child points of the center line
-            var centerLineTransforms = centerLine.GetComponentsInChildren<Transform>();
-            // Skip the first element (which corresponds to the parent center line object itself) and convert the rest of the transforms to an array
-            var centerLinePointObjects = centerLineTransforms.Skip(1).Distinct().ToArray();
-            // Get the first point and set the car's position and rotation to that of the initial point
-            var startingPointTransform = centerLinePointObjects[0];
-            transform.position = startingPointTransform.position;
-            transform.rotation = startingPointTransform.rotation;
-            // Set the car's velocity to zero to prevent it from carrying over momentum from the previous lane
-            rb.velocity = Vector3.zero;
-
-            // Project each of the points' 3D positions onto a 2D plane and store them in the global array
-            centerLinePoints = (
-                from centerLinePointObject in centerLinePointObjects
-                select Utility.ProjectOntoXZPlane(centerLinePointObject.transform.position)
-            ).ToArray();
-
+            // Restart at the beginning of the next lane
+            ResetToStartingPoint();
             // Increment the current lane number
             currentLane++;
-            // Switch lanes once a certain amount of time has passed
-            Invoke("SwitchLanes", timeSpentOnLane);
+
+            // If the lane switching must repeat
+            if (repeat)
+            {
+                // Switch lanes once a certain amount of time has passed
+                Invoke("SwitchLanes", timeSpentOnLane);
+            }
         }
     }
 
@@ -293,6 +362,27 @@ sealed class Car : MonoBehaviour
         point.transform.SetParent(centerLine.transform);
     }
 
+    // Teleport the car back to the starting point and reset the global array of center line points
+    void ResetToStartingPoint()
+    {
+        // Get all child points of the center line
+        var centerLineTransforms = centerLine.GetComponentsInChildren<Transform>();
+        // Skip the first element (which corresponds to the parent center line object itself) and convert the rest of the transforms to an array
+        var centerLinePointObjects = centerLineTransforms.Skip(1).Distinct().ToArray();
+        // Get the first point on the center line
+        var startingPointTransform = centerLinePointObjects[0];
+        // Set the car's position and rotation to that of the initial point
+        transform.position = startingPointTransform.position;
+        transform.rotation = startingPointTransform.rotation;
+        // Set the car's velocity to zero to prevent it from carrying over momentum from the previous lane
+        rb.velocity = Vector3.zero;
+        // Project each of the points' 3D positions onto a 2D plane and store them in the global array
+        centerLinePoints = (
+            from centerLinePointObject in centerLinePointObjects
+            select Utility.ProjectOntoXZPlane(centerLinePointObject.transform.position)
+        ).ToArray();
+    }
+
     // An enum containing the possible states of the car
     enum DrivingMode
     {
@@ -303,6 +393,8 @@ sealed class Car : MonoBehaviour
         // Controlled autonomously without analysis
         Autonomous,
         // Autonomous mode plus saving information related to the car's distance from the center of the road
-        AutonomousVarianceTest
+        AutonomousVarianceTest,
+        // Autonomous mode, using the reinforcement learning agent to learn and drive
+        AutonomousReinforcement
     }
 }

@@ -7,11 +7,8 @@ using System.Collections.Generic;
 // A collection of utility functions called at various times in the car class
 static class Utility
 {
-   // List of past squared errors during automated testing
-    static List<float> squaredErrors = new List<float>();
-
     // Used to calculate the error off of a 2D center line of a 3D point projected into the same two dimensions as the line
-    internal static void CalculateCenterLineError(Vector2[] centerLinePoints, Vector3 position)
+    internal static float CalculateCenterLineError(Vector2[] centerLinePoints, Vector3 position)
     {
         // Project the position of the car onto a 2D plane, essentially removing the vertical position
         var carPosition = ProjectOntoXZPlane(position);
@@ -37,14 +34,12 @@ static class Utility
         // Use the perpendicular line to project the position of the car onto the line between the two points on the center line closest to the car
         var xProjection = (distanceLineIntercept - intercept) / (slope - perpendicularSlope);
         var projection = new Vector2(xProjection, (slope * xProjection) + intercept);
-        // Using the projected point, calculate the squared distance of the car from the nearest point on the center line
-        var variance = (carPosition - projection).sqrMagnitude;
-        // Add it to the list of squared errors
-        squaredErrors.Add(variance);
+        // Using the projected point, calculate the squared distance of the car from the nearest point on the center line and return it
+        return (carPosition - projection).sqrMagnitude;
     }
 
     // Save the results of an autonomous testing run to a file
-    internal static void SaveTestResults(int fileNumber)
+    internal static void SaveTestResults(List<float> squaredErrors, int fileNumber)
     {
         // Add up all of the past squared errors from the center line
         var totalVariance = squaredErrors.Sum();
