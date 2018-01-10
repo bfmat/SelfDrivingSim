@@ -10,14 +10,14 @@ sealed class Car : MonoBehaviour
 {
     // Scaling factor for the wheel angle
     const float wheelAngleMultiplier = 0.1f;
-    // The amount to increase the steering angle per key press (for keyboard controls)
-    const float minSteeringBump = 0.005f;
     // Torque to constantly apply to the front wheels
     const float torque = 16f;
     // During automated tests, spend this many seconds on each individual lane
     const float timeSpentOnLane = 100f;
     // Width and height of saved screenshots
     const int resWidth = 320, resHeight = 180;
+    // The amount to increase the steering angle per key press (for keyboard controls)
+    const float keyboardSteeringBump = 0.1f;
     // The amount by which the steering angle is incremented by a reinforcement learning action
     const float reinforcementSteeringBump = 0.05f;
     // Path to save images in during autonomous driving
@@ -143,10 +143,10 @@ sealed class Car : MonoBehaviour
             {
                 // If the A key is pressed, move the steering angle to the left
                 if (Input.GetKey(KeyCode.A))
-                    wheelAngle -= minSteeringBump;
+                    wheelAngle -= keyboardSteeringBump;
                 // If the D key is pressed, move the steering angle to the right
                 if (Input.GetKey(KeyCode.D))
-                    wheelAngle += minSteeringBump;
+                    wheelAngle += keyboardSteeringBump;
             }
         }
 
