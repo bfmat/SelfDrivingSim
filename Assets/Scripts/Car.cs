@@ -315,7 +315,7 @@ sealed class Car : MonoBehaviour
                     // Increment the iteration counter
                     iterationsSinceFailure++;
                     // If the velocity of the car is very low and it has not just started driving, the car is probably stuck and it has fallen off the road
-                    var done = rb.velocity.magnitude < 0.2 && iterationsSinceFailure > 100;
+                    var done = rb.velocity.magnitude < 0.2 && iterationsSinceFailure > 10;
                     // If the car has failed to stay on the road
                     if (done)
                     {
