@@ -8,8 +8,6 @@ using System.Collections.Generic;
 // The main car class that handles movement and recording
 sealed class Car : MonoBehaviour
 {
-    // Scaling factor for the wheel angle
-    const float wheelAngleMultiplier = 0.1f;
     // Torque to constantly apply to the front wheels
     const float torque = 16f;
     // During automated tests, spend this many seconds on each individual lane
