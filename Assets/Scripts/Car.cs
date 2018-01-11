@@ -16,8 +16,8 @@ sealed class Car : MonoBehaviour
     const int resWidth = 320, resHeight = 180;
     // The amount to increase the steering angle per key press (for keyboard controls)
     const float keyboardSteeringBump = 0.1f;
-    // The amount by which the steering angle is incremented by a reinforcement learning action
-    const float reinforcementSteeringBump = 0.05f;
+    // The absolute value to which the wheel angle is set during a reinforcement learning action
+    const float reinforcementWheelAngle = 0.5f;
     // Path to save images in during autonomous driving
     const string tmpPath = "/tmp/";
     // The path to write data required by the reinforcement learning agent to
@@ -289,18 +289,16 @@ sealed class Car : MonoBehaviour
             // If parsing the file as an integer succeeded
             if (success)
             {
-                // Do nothing if the action is 0, subtract from the steering angle if the action is 1, and add to it if the action is 2
-                var increment = 0f;
+                // Do nothing if the action is 0, make the steering angle negative if the action is 1, and make it positive if the action is 2
                 switch (action)
                 {
                     case 1:
-                        increment = -reinforcementSteeringBump;
+                        wheelAngle = -reinforcementWheelAngle;
                         break;
                     case 2:
-                        increment = reinforcementSteeringBump;
+                        wheelAngle = reinforcementWheelAngle;
                         break;
                 }
-                wheelAngle += increment;
 
                 // If the previous information has been read and deleted
                 if (!File.Exists(reinforcementInformationPath))
