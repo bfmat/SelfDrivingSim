@@ -8,6 +8,8 @@ using System.Collections.Generic;
 // The main car class that handles movement and recording
 sealed class Car : MonoBehaviour
 {
+    // The speed that time passes at when in reinforcement learning mode
+    const float timeScaleReinforcement = 2f;
     // Torque to constantly apply to the front wheels
     const float torque = 16f;
     // During automated tests, spend this many seconds on each individual lane
@@ -19,11 +21,11 @@ sealed class Car : MonoBehaviour
     // The absolute value to which the wheel angle is set during a reinforcement learning action
     const float reinforcementWheelAngle = 0.5f;
     // Path to save images in during autonomous driving
-    const string tmpPath = "/tmp/";
+    const string tmpPath = "/Volumes/RAMDisk/";
     // The path to write data required by the reinforcement learning agent to
-    const string reinforcementInformationPath = "/tmp/information.json";
+    const string reinforcementInformationPath = tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
-    const string reinforcementActionPath = "/tmp/action.txt";
+    const string reinforcementActionPath = tmpPath + "action.txt";
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
@@ -96,6 +98,8 @@ sealed class Car : MonoBehaviour
             // If we are in autonomous mode for use with a reinforcement learning agent
             else if (drivingMode == DrivingMode.AutonomousReinforcement)
             {
+                // Set the speed that time passes at
+                Time.timeScale = timeScaleReinforcement;
                 // Set the car's position to the first lane but do not repeat
                 SwitchLanes(false);
                 // Start control of the steering angle by the agent
