@@ -276,8 +276,6 @@ sealed class Car : MonoBehaviour
     // Coroutine that manages steering and communication with the reinforcement learning agent
     IEnumerator HandleReinforcementSteering()
     {
-        // Initialize a counter for the number of iterations since the last time it fell off the track
-        var iterationsSinceFailure = 0;
         // Loop forever, parallel to the main thread
         while (true)
         {
@@ -308,15 +306,10 @@ sealed class Car : MonoBehaviour
                     // Use the negative squared error plus 1 as the reward function, so it will be positive when the car is within 1 unit of the road, and negative as it approaches the edges of the road
                     var reward = -squaredError + 1f;
 
-                    // Increment the iteration counter
-                    iterationsSinceFailure++;
-                    // If the velocity of the car is very low and it has not just started driving, the car is probably stuck and it has fallen off the road
-                    var done = rb.velocity.magnitude < 0.2 && iterationsSinceFailure > 10;
-                    // If the car has failed to stay on the road
+                    // If the squared error is in excess of 4, end the game and teleport the car back to the starting point
+                    var done = squaredError > 4;
                     if (done)
                     {
-                        // Reset the iteration counter
-                        iterationsSinceFailure = 0;
                         // Go back to the starting point and reset the velocity
                         ResetToStartingPoint();
                     }
