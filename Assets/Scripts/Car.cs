@@ -315,7 +315,7 @@ sealed class Car : MonoBehaviour
                     if (done)
                     {
                         // Go back to the starting point and reset the velocity
-                        ResetToStartingPoint();
+                        ResetToStartingPoint(true);
                     }
 
                     // Create a JSON list out of the wheel angle, the reward, and whether or not the game has ended (using lowercase for the Boolean)
@@ -342,7 +342,7 @@ sealed class Car : MonoBehaviour
             // Set the center line points to the collection corresponding to the next lane
             centerLine = centerLinePointCollections[currentLane];
             // Restart at the beginning of the next lane
-            ResetToStartingPoint();
+            ResetToStartingPoint(false);
             // Increment the current lane number
             currentLane++;
 
@@ -367,24 +367,36 @@ sealed class Car : MonoBehaviour
     }
 
     // Teleport the car back to the starting point and reset the global array of center line points
-    void ResetToStartingPoint()
+    void ResetToStartingPoint(bool randomPoint)
     {
         // Get all child points of the center line
         var centerLineTransforms = centerLine.GetComponentsInChildren<Transform>();
         // Skip the first element (which corresponds to the parent center line object itself) and convert the rest of the transforms to an array
         var centerLinePointObjects = centerLineTransforms.Skip(1).Distinct().ToArray();
-        // Get the first point on the center line
-        var startingPointTransform = centerLinePointObjects[0];
-        // Set the car's position and rotation to that of the initial point
+
+        // Use a random index for the starting point, or simply use 0, depending on the argument
+        var randomIndex = randomPoint ? UnityEngine.Random.Range(0, centerLinePointObjects.Length) : 0;
+        // Get the point on the center line corresponding to the index
+        var startingPointTransform = centerLinePointObjects[randomIndex];
+        // Set the car's position to that of the initial point
         transform.position = startingPointTransform.position;
-        transform.rotation = startingPointTransform.rotation;
-        // Set the car's velocity to zero to prevent it from carrying over momentum from the previous lane
-        rb.velocity = Vector3.zero;
+
         // Project each of the points' 3D positions onto a 2D plane and store them in the global array
         centerLinePoints = (
             from centerLinePointObject in centerLinePointObjects
             select Utility.ProjectOntoXZPlane(centerLinePointObject.transform.position)
         ).ToArray();
+
+        // Get the delta (ignoring the Y axis) from the starting point to the next point
+        var nextPointIndex = (randomIndex + 1) % centerLinePoints.Length;
+        var delta = centerLinePoints[nextPointIndex] - centerLinePoints[randomIndex];
+        // Convert the top-down 2D delta vector to a 3D vector
+        var delta3D = new Vector3(delta.x, 0f, delta.y);
+        // Set the car's rotation to look in the direction of the delta vector
+        transform.rotation = Quaternion.LookRotation(delta3D);
+
+        // Set the car's velocity to zero to prevent it from carrying over momentum from the previous lane
+        rb.velocity = Vector3.zero;
     }
 
     // An enum containing the possible states of the car
