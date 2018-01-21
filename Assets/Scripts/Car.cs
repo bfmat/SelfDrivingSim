@@ -18,14 +18,17 @@ sealed class Car : MonoBehaviour
     const int resWidth = 320, resHeight = 180;
     // The amount to increase the steering angle per key press (for keyboard controls)
     const float keyboardSteeringBump = 0.1f;
-    // The absolute value to which the wheel angle is set during a reinforcement learning action
-    const float reinforcementWheelAngle = 0.5f;
+    // The absolute value which the wheel angle is incremented during a reinforcement learning action
+    const float reinforcementWheelAngleBump = 0.1f;
     // Path to save images in during autonomous driving
     const string tmpPath = "/Volumes/RAMDisk/";
     // The path to write data required by the reinforcement learning agent to
     const string reinforcementInformationPath = tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
     const string reinforcementActionPath = tmpPath + "action.txt";
+    // Whether or not to use backlash in steering 
+    const bool useBacklash = false;
+
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
@@ -269,7 +272,7 @@ sealed class Car : MonoBehaviour
                 // Convert the file contents to a decimal number which represents the steering angle
                 var steeringAngle = float.Parse(fileContents);
                 // Convert the steering angle to a wheel angle
-                wheelAngle = Steering.getWheelAngle(steeringAngle);
+                wheelAngle = Steering.getWheelAngle(steeringAngle, useBacklash);
 
                 // Continue executing again as soon as possible
                 yield return null;
@@ -291,15 +294,24 @@ sealed class Car : MonoBehaviour
             // If parsing the file as an integer succeeded
             if (success)
             {
-                // Do nothing if the action is 0, make the steering angle negative if the action is 1, and make it positive if the action is 2
-                switch (action)
+                // The action should be 0, 1, or 2
+                // If it is 0, set the steering angle to 0
+                if (action == 0)
                 {
-                    case 1:
-                        wheelAngle = -reinforcementWheelAngle;
-                        break;
-                    case 2:
-                        wheelAngle = reinforcementWheelAngle;
-                        break;
+                    wheelAngle = 0f;
+                }
+                // Otherwise, it is 1 or 2
+                else
+                {
+                    // Get the sign of the corresponding steering angle
+                    var sign = (action == 1) ? -1 : 1;
+                    // If the sign of the wheel angle is presently the opposite of the calculated sign, set it to 0
+                    if (Mathf.Sign(wheelAngle) != sign)
+                    {
+                        wheelAngle = 0f;
+                    }
+                    // Multiply the sign by the absolute increment to get the signed increment, and add it to the wheel angle
+                    wheelAngle += (reinforcementWheelAngleBump * sign);
                 }
 
                 // If the previous information has been read and deleted

@@ -10,12 +10,18 @@ static class Steering
     static float deadBandCenter = 0f;
 
     // The main function that takes a steering wheel from the steering system and returns a car wheel angle in degrees
-    internal static float getWheelAngle(float steeringAngle)
+    internal static float getWheelAngle(float steeringAngle, bool useBacklash)
     {
-        // Introduce backlash to the steering angle
-        var steeringAngleWithBacklash = introduceBacklash(steeringAngle);
+        // Create a modifiable variable for the steering angle with backlash
+        var processedSteeringAngle = steeringAngle;
+        // If backlash is enabled
+        if (useBacklash)
+        {
+            // Introduce backlash to the steering angle
+            processedSteeringAngle = introduceBacklash(steeringAngle);
+        }
         // Multiply the processed steering angle by a constant to convert it to the approximate length of the opposite side of an angle where the wheel is in line with the hypotenuse and the adjacent is 1 unit
-        var triangleOppositeLength = steeringAngleWithBacklash * 1.038f;
+        var triangleOppositeLength = processedSteeringAngle * 1.038f;
         // Calculate the inverse tangent of the length of the opposite, which will equal the angle of the wheel in radians because the length of the adjacent is 1
         var wheelAngleRadians = Mathf.Atan(triangleOppositeLength);
         // Convert the wheel angle to degrees and return it
