@@ -21,7 +21,7 @@ sealed class Car : MonoBehaviour
     // The absolute value which the wheel angle is incremented during a reinforcement learning action
     const float reinforcementWheelAngleBump = 0.1f;
     // Path to save images in during autonomous driving
-    const string tmpPath = "/Volumes/RAMDisk/";
+    const string tmpPath = "/tmp/";
     // The path to write data required by the reinforcement learning agent to
     const string reinforcementInformationPath = tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
