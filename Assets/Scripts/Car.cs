@@ -26,6 +26,8 @@ sealed class Car : MonoBehaviour
     const string reinforcementInformationPath = tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
     const string reinforcementActionPath = tmpPath + "action.txt";
+    // The path to read stop sign positions from
+    const string stopSignPositionPath = tmpPath + "sign_positions.csv";
     // Whether or not to use backlash in steering 
     const bool useBacklash = false;
 
@@ -338,6 +340,27 @@ sealed class Car : MonoBehaviour
             }
             // Wait for the next fixed update
             yield return new WaitForFixedUpdate();
+        }
+    }
+
+    // Function for updating bounding boxes in the UI that mark the positions of stop signs
+    IEnumerator UpdateStopSigns()
+    {
+        // Loop forever, reading the file and updating positions
+        while (true)
+        {
+            // If the file exists at all
+            if (File.Exists(stopSignPositionPath))
+            {
+                // For each of the lines in the file
+                foreach (var line in File.ReadAllLines(stopSignPositionPath))
+                {
+                    // Split the string by a comma and convert the two elements to floating point numbers
+                    var stringValues = line.Split(',');
+                    var x = float.Parse(stringValues[0]);
+                    var y = float.Parse(stringValues[1]);
+                }
+            }
         }
     }
 
