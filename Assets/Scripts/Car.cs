@@ -365,6 +365,12 @@ sealed class Car : MonoBehaviour
             // If the file exists at all
             if (File.Exists(stopSignPositionPath))
             {
+                // Destroy all child objects of the UI canvas
+                foreach (Transform childTransform in uiCanvas.transform)
+                {
+                    Destroy(childTransform.gameObject);
+                }
+
                 // For each of the lines in the file
                 foreach (var line in File.ReadAllLines(stopSignPositionPath))
                 {
@@ -372,11 +378,11 @@ sealed class Car : MonoBehaviour
                     var stringValues = line.Split(',');
                     var x = float.Parse(stringValues[0]) - 0.5f;
                     var y = float.Parse(stringValues[1]) - 0.5f;
-                    print(x.ToString() + " " + y.ToString());
-                    // Instantiate a bounding box, set it as a child of the UI canvas, and set its position to the X and Y values, multiplied by the corresponding dimensions of the UI canvas
+                    // Instantiate a bounding box, set it as a child of the UI canvas, and set its position to the X and Y values multiplied by the corresponding dimensions of the UI canvas
                     var box = Instantiate(boundingBox);
-                    box.transform.SetParent(uiCanvas.transform);
-                    box.transform.position = new Vector3(x * uiCanvasSize.x, y * uiCanvasSize.y);
+                    var boxRectTransform = box.GetComponent<RectTransform>();
+                    boxRectTransform.SetParent(uiCanvas.transform);
+                    boxRectTransform.anchoredPosition = new Vector2(x * uiCanvasSize.x, y * uiCanvasSize.y);
                 }
             }
 
