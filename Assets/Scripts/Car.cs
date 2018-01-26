@@ -42,6 +42,8 @@ sealed class Car : MonoBehaviour
     [SerializeField] bool drawLine;
     // Parent objects of points previously dropped behind the car
     [SerializeField] GameObject[] centerLinePointCollections;
+    // The bounding boxes placed on the UI canvas that mark the locations of stop signs
+    [SerializeField] GameObject boundingBox;
 
     // Track the errors off of the lane's center line
     bool trackErrors = false;
@@ -61,13 +63,21 @@ sealed class Car : MonoBehaviour
     Rigidbody rb;
     // List of past squared errors during automated testing
     List<float> squaredErrors = new List<float>();
-
+    // The UI canvas on which the bounding boxes are placed
+    GameObject uiCanvas;
+    // The size of the UI canvas's rectangle transform
+    Vector2 uiCanvasSize;
 
     // Main initialization function
     void Start()
     {
         // Get the robot's rigidbody and store it in a global variable
         rb = GetComponent<Rigidbody>();
+
+        // Find the UI canvas and set the global variable
+        uiCanvas = GameObject.FindGameObjectWithTag("UICanvas");
+        // Get the size of the canvas's transform
+        uiCanvasSize = uiCanvas.GetComponent<RectTransform>().sizeDelta;
 
         // For each of the car's wheel colliders
         foreach (var wheel in GetComponentsInChildren<WheelCollider>())
@@ -131,6 +141,9 @@ sealed class Car : MonoBehaviour
         // Set each of the drive wheels' torque to the predefined torque value
         foreach (var driveWheel in driveWheels)
             driveWheel.motorTorque = torque;
+
+        // Run the bounding box coroutine
+        StartCoroutine(UpdateStopSigns());
     }
 
     // Update function, called 50 times per second
@@ -355,12 +368,20 @@ sealed class Car : MonoBehaviour
                 // For each of the lines in the file
                 foreach (var line in File.ReadAllLines(stopSignPositionPath))
                 {
-                    // Split the string by a comma and convert the two elements to floating point numbers
+                    // Split the string by a comma and convert the two elements to floating point numbers that are centered at 0
                     var stringValues = line.Split(',');
-                    var x = float.Parse(stringValues[0]);
-                    var y = float.Parse(stringValues[1]);
+                    var x = float.Parse(stringValues[0]) - 0.5f;
+                    var y = float.Parse(stringValues[1]) - 0.5f;
+                    print(x.ToString() + " " + y.ToString());
+                    // Instantiate a bounding box, set it as a child of the UI canvas, and set its position to the X and Y values, multiplied by the corresponding dimensions of the UI canvas
+                    var box = Instantiate(boundingBox);
+                    box.transform.SetParent(uiCanvas.transform);
+                    box.transform.position = new Vector3(x * uiCanvasSize.x, y * uiCanvasSize.y);
                 }
             }
+
+            // Wait one frame before updating
+            yield return new WaitForEndOfFrame();
         }
     }
 
