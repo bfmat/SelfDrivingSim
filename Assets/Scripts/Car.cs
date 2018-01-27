@@ -20,17 +20,12 @@ sealed class Car : MonoBehaviour
     const float keyboardSteeringBump = 0.1f;
     // The absolute value which the wheel angle is incremented during a reinforcement learning action
     const float reinforcementWheelAngleBump = 0.1f;
-    // Path to save images in during autonomous driving
-    const string tmpPath = "/tmp/";
     // The path to write data required by the reinforcement learning agent to
-    const string reinforcementInformationPath = tmpPath + "information.json";
+    const string reinforcementInformationPath = Utility.tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
-    const string reinforcementActionPath = tmpPath + "action.txt";
-    // The path to read stop sign positions from
-    const string stopSignPositionPath = tmpPath + "sign_positions.csv";
+    const string reinforcementActionPath = Utility.tmpPath + "action.txt";
     // Whether or not to use backlash in steering 
     const bool useBacklash = false;
-
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
@@ -42,8 +37,6 @@ sealed class Car : MonoBehaviour
     [SerializeField] bool drawLine;
     // Parent objects of points previously dropped behind the car
     [SerializeField] GameObject[] centerLinePointCollections;
-    // The bounding boxes placed on the UI canvas that mark the locations of stop signs
-    [SerializeField] GameObject boundingBox;
 
     // Track the errors off of the lane's center line
     bool trackErrors = false;
@@ -63,21 +56,12 @@ sealed class Car : MonoBehaviour
     Rigidbody rb;
     // List of past squared errors during automated testing
     List<float> squaredErrors = new List<float>();
-    // The UI canvas on which the bounding boxes are placed
-    GameObject uiCanvas;
-    // The size of the UI canvas's rectangle transform
-    Vector2 uiCanvasSize;
 
     // Main initialization function
     void Start()
     {
         // Get the robot's rigidbody and store it in a global variable
         rb = GetComponent<Rigidbody>();
-
-        // Find the UI canvas and set the global variable
-        uiCanvas = GameObject.FindGameObjectWithTag("UICanvas");
-        // Get the size of the canvas's transform
-        uiCanvasSize = uiCanvas.GetComponent<RectTransform>().sizeDelta;
 
         // For each of the car's wheel colliders
         foreach (var wheel in GetComponentsInChildren<WheelCollider>())
@@ -141,9 +125,6 @@ sealed class Car : MonoBehaviour
         // Set each of the drive wheels' torque to the predefined torque value
         foreach (var driveWheel in driveWheels)
             driveWheel.motorTorque = torque;
-
-        // Run the bounding box coroutine
-        StartCoroutine(UpdateStopSigns());
     }
 
     // Update function, called 50 times per second
@@ -240,7 +221,7 @@ sealed class Car : MonoBehaviour
             // Otherwise, save the file in the temp folder
             else
             {
-                fileName = tmpPath + "temp.png";
+                fileName = Utility.tmpPath + "temp.png";
             }
             // Write the contents of the image to a file
             File.WriteAllBytes(fileName, encodedImage);
@@ -248,7 +229,7 @@ sealed class Car : MonoBehaviour
             // This is done so that the files are never read by other programs when partially written
             if (drivingMode != DrivingMode.Recording)
             {
-                File.Move(tmpPath + "temp.png", tmpPath + "sim" + i + ".png");
+                File.Move(Utility.tmpPath + "temp.png", Utility.tmpPath + "sim" + i + ".png");
             }
 
             // Wait until the next frame to save another image
@@ -263,7 +244,7 @@ sealed class Car : MonoBehaviour
         // Store the sim.txt suffix in a constant
         const string fileSuffix = "sim.txt";
         // Calculate the starting index of the number in these files' full paths
-        int startingIndex = tmpPath.Length;
+        int startingIndex = Utility.tmpPath.Length;
         // Calculate the length of all parts of the path except for the number, used to calculate the length of the number during the substring operation
         int pathLengthExcludingNumber = startingIndex + fileSuffix.Length;
 
@@ -276,13 +257,13 @@ sealed class Car : MonoBehaviour
                 // The file of the above format with the greatest numeric prefix needs to be found
                 // Get the names of all of these files and convert the numeric prefixes to integers, choosing the maximum (most recent) file index
                 var maxIndex = (
-                    from path in Directory.GetFiles(tmpPath)
+                    from path in Directory.GetFiles(Utility.tmpPath)
                     where path.Contains(fileSuffix)
                     select int.Parse(path.Substring(startingIndex, path.Length - pathLengthExcludingNumber))
                 ).Max();
 
                 // Create a stream reader and read the corresponding file's entire contents
-                var streamReader = new StreamReader(tmpPath + maxIndex + fileSuffix);
+                var streamReader = new StreamReader(Utility.tmpPath + maxIndex + fileSuffix);
                 var fileContents = streamReader.ReadToEnd();
                 // Convert the file contents to a decimal number which represents the steering angle
                 var steeringAngle = float.Parse(fileContents);
@@ -353,41 +334,6 @@ sealed class Car : MonoBehaviour
             }
             // Wait for the next fixed update
             yield return new WaitForFixedUpdate();
-        }
-    }
-
-    // Function for updating bounding boxes in the UI that mark the positions of stop signs
-    IEnumerator UpdateStopSigns()
-    {
-        // Loop forever, reading the file and updating positions
-        while (true)
-        {
-            // If the file exists at all
-            if (File.Exists(stopSignPositionPath))
-            {
-                // Destroy all child objects of the UI canvas
-                foreach (Transform childTransform in uiCanvas.transform)
-                {
-                    Destroy(childTransform.gameObject);
-                }
-
-                // For each of the lines in the file
-                foreach (var line in File.ReadAllLines(stopSignPositionPath))
-                {
-                    // Split the string by a comma and convert the two elements to floating point numbers that are centered at 0
-                    var stringValues = line.Split(',');
-                    var x = float.Parse(stringValues[0]) - 0.5f;
-                    var y = float.Parse(stringValues[1]) - 0.5f;
-                    // Instantiate a bounding box, set it as a child of the UI canvas, and set its position to the X and Y values multiplied by the corresponding dimensions of the UI canvas
-                    var box = Instantiate(boundingBox);
-                    var boxRectTransform = box.GetComponent<RectTransform>();
-                    boxRectTransform.SetParent(uiCanvas.transform);
-                    boxRectTransform.anchoredPosition = new Vector2(x * uiCanvasSize.x, y * uiCanvasSize.y);
-                }
-            }
-
-            // Wait one frame before updating
-            yield return new WaitForEndOfFrame();
         }
     }
 
