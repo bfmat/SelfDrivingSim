@@ -120,6 +120,15 @@ sealed class Car : MonoBehaviour
                 // Start control of the steering angle by the agent
                 StartCoroutine(HandleReinforcementSteering());
             }
+
+            // If we are in autonomous mode with the evolutionary algorithm agent
+            else if (drivingMode == DrivingMode.AutonomousEvolutionary)
+            {
+                // Set the car's position to the first lane but do not repeat
+                SwitchLanes(false);
+                // Start automatic control of the steering angle
+                StartCoroutine(HandleAutonomousSteering());
+            }
         }
 
         // If we are currently dropping points behind the car
@@ -270,8 +279,8 @@ sealed class Car : MonoBehaviour
         // Loop forever, parallel to the main thread
         while (true)
         {
-            // If the car is in regular autonomous mode
-            if (drivingMode == DrivingMode.Autonomous)
+            // If the car is not in manual or recording mode
+            if (drivingMode != DrivingMode.Autonomous && drivingMode != DrivingMode.Recording)
             {
                 // The file of the above format with the greatest numeric prefix needs to be found
                 // Get the names of all of these files and convert the numeric prefixes to integers, choosing the maximum (most recent) file index
@@ -288,10 +297,9 @@ sealed class Car : MonoBehaviour
                 var steeringAngle = float.Parse(fileContents);
                 // Convert the steering angle to a wheel angle
                 wheelAngle = Steering.getWheelAngle(steeringAngle, useBacklash);
-
-                // Continue executing again as soon as possible
-                yield return null;
             }
+            // Continue executing again as soon as possible
+            yield return null;
         }
     }
 
@@ -473,6 +481,8 @@ sealed class Car : MonoBehaviour
         // Autonomous mode plus saving information related to the car's distance from the center of the road
         AutonomousVarianceTest,
         // Autonomous mode, using the reinforcement learning agent to learn and drive
-        AutonomousReinforcement
+        AutonomousReinforcement,
+        // Autonomous mode, using evolutionary algorithms to train a neural network that steers the car
+        AutonomousEvolutionary
     }
 }
