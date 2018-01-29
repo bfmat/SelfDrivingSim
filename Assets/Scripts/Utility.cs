@@ -4,9 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-// A collection of utility functions called at various times in the car class
+// A collection of utility functions and constants called at various times in the car class
 static class Utility
 {
+    // Path to save images in during autonomous driving
+    internal const string tmpPath = "/tmp/";
+
     // Used to calculate the error off of a 2D center line of a 3D point projected into the same two dimensions as the line
     internal static float CalculateCenterLineError(Vector2[] centerLinePoints, Vector3 position)
     {

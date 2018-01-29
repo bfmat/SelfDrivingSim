@@ -5,6 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
-    path: Assets/Scenes/RaceTrack.unity
+  - enabled: 0
+    path: 
     guid: de4e85fdd0f99459a8353754dc5a8a1d
+  - enabled: 1
+    path: Assets/Scenes/StopSign.unity
+    guid: 9eb64d672cbbc44ed8466e20b588eef4
