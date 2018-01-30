@@ -740,7 +740,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce400fa9fd0bf4998aa192611cb96324, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drivingMode: 2
+  drivingMode: 5
   driveWheels:
   - {fileID: 146952074675201536}
   - {fileID: 146818543725268104}
