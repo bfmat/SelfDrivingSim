@@ -104,15 +104,6 @@ sealed class Car : MonoBehaviour
                 // Start control of the steering angle by the agent
                 StartCoroutine(HandleReinforcementSteering());
             }
-
-            // If we are in autonomous mode with the evolutionary algorithm agent
-            else if (drivingMode == DrivingMode.AutonomousEvolutionary)
-            {
-                // Set the car's position to the first lane but do not repeat
-                SwitchLanes(false);
-                // Start automatic control of the steering angle
-                StartCoroutine(HandleAutonomousSteering());
-            }
         }
 
         // If we are currently dropping points behind the car
@@ -427,8 +418,6 @@ sealed class Car : MonoBehaviour
         // Autonomous mode plus saving information related to the car's distance from the center of the road
         AutonomousVarianceTest,
         // Autonomous mode, using the reinforcement learning agent to learn and drive
-        AutonomousReinforcement,
-        // Autonomous mode, using evolutionary algorithms to train a neural network that steers the car
-        AutonomousEvolutionary
+        AutonomousReinforcement
     }
 }
