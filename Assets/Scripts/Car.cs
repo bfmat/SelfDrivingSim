@@ -24,6 +24,10 @@ sealed class Car : MonoBehaviour
     const string reinforcementInformationPath = Utility.tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
     const string reinforcementActionPath = Utility.tmpPath + "action.txt";
+    // The path to the file whose existence instructs the simulation to reset the car to its starting point when in evolutionary autonomous mode
+    const string evolutionaryResetPath = Utility.tmpPath + "reset_sim";
+    // The distance that the car must be away from the center line for it to be considered a failure
+    const float failureThreshold = 4f;
     // Whether or not to use backlash in steering 
     const bool useBacklash = false;
 
@@ -103,6 +107,17 @@ sealed class Car : MonoBehaviour
                 SwitchLanes(false);
                 // Start control of the steering angle by the agent
                 StartCoroutine(HandleReinforcementSteering());
+            }
+
+            // If we are in autonomous mode with the evolutionary algorithm agent
+            else if (drivingMode == DrivingMode.AutonomousEvolutionary)
+            {
+                // Set the car's position to the first lane but do not repeat
+                SwitchLanes(false);
+                // Start automatic control of the steering angle
+                StartCoroutine(HandleAutonomousSteering());
+                // Reset the car if it falls off the road or if it is instructed to by the agent
+                StartCoroutine(EvolutionaryReset());
             }
         }
 
@@ -317,8 +332,8 @@ sealed class Car : MonoBehaviour
                     // Use the negative squared error plus 1 as the reward function, so it will be positive when the car is within 1 unit of the road, and negative as it approaches the edges of the road
                     var reward = -squaredError + 1f;
 
-                    // If the squared error is in excess of 4, end the game and teleport the car back to the starting point
-                    var done = squaredError > 4;
+                    // If the squared error is in excess of the predefined threshold, end the game and teleport the car back to the starting point
+                    var done = squaredError > failureThreshold;
                     if (done)
                     {
                         // Go back to the starting point and reset the velocity
@@ -330,6 +345,26 @@ sealed class Car : MonoBehaviour
                     // Write the data to the information path
                     File.WriteAllText(reinforcementInformationPath, jsonData);
                 }
+            }
+            // Wait for the next fixed update
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    // Coroutine that monitors the car's distance from the center line and resets if it exceeds a certain value, or if it is instructed to reset by the evolutionary driving agent
+    IEnumerator EvolutionaryReset()
+    {
+        // Loop forever
+        while (true)
+        {
+            // Check if the present squared error from the center line is in excess of the threshold
+            var excessiveError = Utility.CalculateCenterLineError(centerLinePoints, transform.position) > failureThreshold;
+            // Check if the reset file exists
+            var resetFileExists = File.Exists(evolutionaryResetPath);
+            // If either of those conditions are true, reset to the beginning
+            if (excessiveError || resetFileExists)
+            {
+                ResetToStartingPoint(false);
             }
             // Wait for the next fixed update
             yield return new WaitForFixedUpdate();
@@ -418,6 +453,8 @@ sealed class Car : MonoBehaviour
         // Autonomous mode plus saving information related to the car's distance from the center of the road
         AutonomousVarianceTest,
         // Autonomous mode, using the reinforcement learning agent to learn and drive
-        AutonomousReinforcement
+        AutonomousReinforcement,
+        // Autonomous mode, using evolutionary algorithms to train a neural network that steers the car
+        AutonomousEvolutionary
     }
 }
