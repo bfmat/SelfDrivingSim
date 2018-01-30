@@ -261,7 +261,7 @@ sealed class Car : MonoBehaviour
         while (true)
         {
             // If the car is not in manual or recording mode
-            if (drivingMode != DrivingMode.Autonomous && drivingMode != DrivingMode.Recording)
+            if (drivingMode != DrivingMode.Manual && drivingMode != DrivingMode.Recording)
             {
                 // The file of the above format with the greatest numeric prefix needs to be found
                 // Get the names of all of these files and convert the numeric prefixes to integers, choosing the maximum (most recent) file index
