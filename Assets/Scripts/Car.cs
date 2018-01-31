@@ -29,7 +29,7 @@ sealed class Car : MonoBehaviour
     // The distance that the car must be away from the center line for it to be considered a failure
     const float failureThreshold = 4f;
     // Whether or not to use backlash in steering 
-    const bool useBacklash = false;
+    const bool useBacklash = true;
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
