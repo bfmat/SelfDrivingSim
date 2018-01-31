@@ -30,6 +30,8 @@ sealed class Car : MonoBehaviour
     const float failureThreshold = 4f;
     // Whether or not to use backlash in steering 
     const bool useBacklash = true;
+    // The time to wait after reading a steering angle file, to simulate the slower framerate of the real car
+    const float fileReadingDelay = 0.1f;
 
     // Manual, recording, autonomous, automated test
     [SerializeField] DrivingMode drivingMode;
@@ -285,8 +287,8 @@ sealed class Car : MonoBehaviour
                 // Convert the steering angle to a wheel angle
                 wheelAngle = Steering.getWheelAngle(steeringAngle, useBacklash);
             }
-            // Continue executing again as soon as possible
-            yield return null;
+            // Wait for a predefined delay to simulate the limited framerate of the real car
+            yield return new WaitForSeconds(fileReadingDelay);
         }
     }
 

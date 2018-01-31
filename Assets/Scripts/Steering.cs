@@ -4,7 +4,7 @@ using UnityEngine;
 static class Steering
 {
     // The width in steering angle units of the dead band
-    const float deadBandWidth = 0.005f;
+    const float deadBandWidth = 0.01f;
 
     // The center of the current backlash dead band in steering angle units
     static float deadBandCenter = 0f;
@@ -14,7 +14,6 @@ static class Steering
     {
         // Apply backlash to the steering angle if it is required
         var processedSteeringAngle = useBacklash ? introduceBacklash(steeringAngle) : steeringAngle;
-        Debug.Log("Before: " + steeringAngle + ", After: " + processedSteeringAngle);
         // Multiply the processed steering angle by a constant to convert it to the approximate length of the opposite side of an angle where the wheel is in line with the hypotenuse and the adjacent is 1 unit
         var triangleOppositeLength = processedSteeringAngle * 1.038f;
         // Calculate the inverse tangent of the length of the opposite, which will equal the angle of the wheel in radians because the length of the adjacent is 1
