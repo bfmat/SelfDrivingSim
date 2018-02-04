@@ -249,6 +249,9 @@ sealed class Car : MonoBehaviour
                 File.Move(Utility.tmpPath + "temp.png", Utility.tmpPath + "sim" + i + ".png");
             }
 
+	    // Unload unused assets to get rid of unreferenced objects and prevent memory leaks
+	    Resources.UnloadUnusedAssets();
+
             // Wait until the next frame to save another image
             yield return new WaitForEndOfFrame();
         }
