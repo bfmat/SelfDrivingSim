@@ -362,16 +362,12 @@ sealed class Car : MonoBehaviour
         // Loop forever
         while (true)
         {
-            // Check if the present squared error from the center line is in excess of the threshold
-            var excessiveError = Utility.CalculateCenterLineError(centerLinePoints, transform.position) > failureThreshold;
-            // Check if the reset file exists
-            var resetFileExists = File.Exists(evolutionaryResetPath);
-            // If either of those conditions are true
-            if (excessiveError || resetFileExists)
+            // If the reset file exists
+            if (File.Exists(evolutionaryResetPath))
             {
                 // Reset to the beginning
                 ResetToStartingPoint(false);
-                // Delete the reset file if it exists
+                // Delete the reset file
                 File.Delete(evolutionaryResetPath);
             }
             // Wait for the next fixed update
