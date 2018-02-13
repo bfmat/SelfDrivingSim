@@ -23,6 +23,12 @@ sealed class SignBoxManager : MonoBehaviour
     {
         // Find the UI canvas and set the global variable
         uiCanvas = GameObject.FindGameObjectWithTag("UICanvas");
+	// Check if it is null; if it is, destroy this script and exit
+	if (uiCanvas == null)
+        {
+            Destroy(this);
+            return;
+        }
         // Get the size of the canvas's transform
         uiCanvasSize = uiCanvas.GetComponent<RectTransform>().sizeDelta;
         // Get the box's starting scale and remember it for later use
