@@ -11,7 +11,7 @@ sealed class Car : MonoBehaviour
     // The speed that time passes at when in reinforcement learning mode
     const float timeScaleReinforcement = 1f;
     // Torque to constantly apply to the front wheels
-    const float torque = 16f;
+    const float torque = 12.5f;
     // During automated tests, spend this many seconds on each individual lane
     const float timeSpentOnLane = 100f;
     // Width and height of saved screenshots
