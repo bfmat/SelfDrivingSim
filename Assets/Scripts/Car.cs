@@ -433,6 +433,9 @@ sealed class Car : MonoBehaviour
 
         // Set the car's velocity to zero to prevent it from carrying over momentum from the previous lane
         rb.velocity = Vector3.zero;
+	
+	// Reset the wheel angle to zero so that steering changes do not persist after death
+	wheelAngle = 0f;
     }
 
     // An enum containing the possible states of the car
