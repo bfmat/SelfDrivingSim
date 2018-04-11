@@ -309,22 +309,12 @@ sealed class Car : MonoBehaviour
             // If parsing the file as an integer succeeded
             if (success)
             {
-                // The action should be 0, 1, or 2
-                // If it is 0, set the steering angle to 0
-                if (action == 0)
-                {
-                    wheelAngle = 0f;
-                }
-                // Otherwise, it is 1 or 2
-                else
+                // The action should be 0, 1, or 2; 0 represents no change
+		// If it is 1 or 2, a change to the steering angle is required
+                if (action != 0)
                 {
                     // Get the sign of the corresponding steering angle
                     var sign = (action == 1) ? -1 : 1;
-                    // If the sign of the wheel angle is presently the opposite of the calculated sign, set it to 0
-                    if (Mathf.Sign(wheelAngle) != sign)
-                    {
-                        wheelAngle = 0f;
-                    }
                     // Multiply the sign by the absolute increment to get the signed increment, and add it to the wheel angle
                     wheelAngle += (reinforcementWheelAngleBump * sign);
                 }
