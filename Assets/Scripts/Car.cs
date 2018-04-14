@@ -29,7 +29,7 @@ sealed class Car : MonoBehaviour
     // The distance that the car must be away from the center line for it to be considered a failure
     const float failureThreshold = 4f;
     // Whether or not to use backlash in steering 
-    const bool useBacklash = true;
+    const bool useBacklash = false;
     // The time to wait after reading a steering angle file, to simulate the slower framerate of the real car
     const float fileReadingDelay = 0.1f;
 
