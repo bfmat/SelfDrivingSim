@@ -18,8 +18,8 @@ sealed class Car : MonoBehaviour
     const int resWidth = 320, resHeight = 180;
     // The amount to increase the steering angle per key press (for keyboard controls)
     const float keyboardSteeringBump = 0.1f;
-    // The absolute value which the wheel angle is incremented during a reinforcement learning action
-    const float reinforcementWheelAngleBump = 0.1f;
+    // The absolute value which the wheel angle is set to during a reinforcement learning action
+    const float reinforcementWheelAngle = 0.3f;
     // The path to write data required by the reinforcement learning agent to
     const string reinforcementInformationPath = Utility.tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
@@ -310,25 +310,19 @@ sealed class Car : MonoBehaviour
             if (success)
             {
                 // The action should be 0, 1, or 2
-                // If it is 0, set the steering angle to 0
-                if (action == 0)
-                {
-                    wheelAngle = 0f;
-                }
-                // Otherwise, it is 1 or 2
-                else
-                {
-                    // Get the sign of the corresponding steering angle
-                    var sign = (action == 1) ? -1 : 1;
-                    // If the sign of the wheel angle is presently the opposite of the calculated sign, set it to 0
-                    if (Mathf.Sign(wheelAngle) != sign)
-                    {
-                        wheelAngle = 0f;
-                    }
-                    // Multiply the sign by the absolute increment to get the signed increment, and add it to the wheel angle
-                    wheelAngle += (reinforcementWheelAngleBump * sign);
-                }
-                
+		// 0 corresponds to a steering angle of 0, and 1 and 2 are positive and negative absolute steering angles
+		switch (action) {
+		    case 0:
+		        wheelAngle = 0;
+			break;
+		    case 1:
+		        wheelAngle = reinforcementWheelAngle;
+			break;
+		    case 2:
+		        wheelAngle = -reinforcementWheelAngle;
+			break;
+		}
+
                 // If the previous information has been read and deleted
                 if (!File.Exists(reinforcementInformationPath))
                 {
