@@ -19,7 +19,7 @@ sealed class Car : MonoBehaviour
     // The amount to increase the steering angle per key press (for keyboard controls)
     const float keyboardSteeringBump = 0.1f;
     // The absolute value which the wheel angle is set to during a reinforcement learning action
-    const float reinforcementWheelAngle = 0.3f;
+    const float reinforcementWheelAngle = 0.5f;
     // The path to write data required by the reinforcement learning agent to
     const string reinforcementInformationPath = Utility.tmpPath + "information.json";
     // The path to read actions calculated by the reinforcement learning agent from
