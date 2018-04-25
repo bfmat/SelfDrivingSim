@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// A component that reads stop sign positions and places a bounding box on screen
 sealed class SignBoxManager : MonoBehaviour
 {
     // The path to read stop sign positions from
@@ -23,8 +24,8 @@ sealed class SignBoxManager : MonoBehaviour
     {
         // Find the UI canvas and set the global variable
         uiCanvas = GameObject.FindGameObjectWithTag("UICanvas");
-	// Check if it is null; if it is, destroy this script and exit
-	if (uiCanvas == null)
+        // Check if it is null; if it is, destroy this script and exit
+        if (uiCanvas == null)
         {
             Destroy(this);
             return;
